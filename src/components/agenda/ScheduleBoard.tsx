@@ -1,0 +1,201 @@
+import { useEffect, useMemo, useRef, type PointerEvent } from 'react';
+import type { Day, Session } from '../../types';
+import { toMinutes, type ConferenceClock, type LiveStatus } from '../../lib/time';
+import './board.css';
+
+export const PX_PER_MIN = 3.4;
+const LABEL_W = 132;
+const SNAP_MIN = 5;
+
+export function roomKey(room: string): string {
+  return room.replace(/\s*\(\d+\)\s*$/, '').trim();
+}
+
+export function boardRange(sessions: Session[]): { start: number; end: number } {
+  const starts = sessions.map((s) => toMinutes(s.start_time));
+  const ends = sessions.map((s) => toMinutes(s.end_time));
+  const start = Math.floor(Math.min(8 * 60, ...starts) / 60) * 60;
+  const end = Math.ceil(Math.max(18 * 60, ...ends) / 60) * 60;
+  return { start, end };
+}
+
+const minToX = (min: number, start: number) => (min - start) * PX_PER_MIN;
+const fmt = (min: number) => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
+
+interface Props {
+  day: Day;
+  sessions: Session[]; // all sessions of the day, time-sorted
+  dimmedIds: Set<string>;
+  live: LiveStatus;
+  clock: ConferenceClock;
+  scrubMin: number | null;
+  onScrub: (min: number | null) => void;
+  onOpen: (s: Session) => void;
+}
+
+export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin, onScrub, onOpen }: Props) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { start, end } = useMemo(() => boardRange(sessions), [sessions]);
+  const gridW = minToX(end, start);
+
+  const bands = useMemo(() => sessions.filter((s) => s.type === 'break'), [sessions]);
+  const blocks = useMemo(() => sessions.filter((s) => s.type !== 'break' && s.room), [sessions]);
+
+  const rooms = useMemo(() => {
+    const keys = [...new Set(blocks.map((b) => roomKey(b.room!)))];
+    return keys.sort((a, b) => {
+      const aHall = a.toLowerCase().startsWith('hall') ? 0 : 1;
+      const bHall = b.toLowerCase().startsWith('hall') ? 0 : 1;
+      return aHall - bHall || a.localeCompare(b, undefined, { numeric: true });
+    });
+  }, [blocks]);
+
+  const hours = useMemo(() => {
+    const list: number[] = [];
+    for (let m = start; m <= end; m += 60) list.push(m);
+    return list;
+  }, [start, end]);
+
+  const isToday = day.date === clock.date;
+  const nowX = isToday && clock.minutes >= start && clock.minutes <= end ? minToX(clock.minutes, start) : null;
+
+  // On day change, bring the playhead (or the first session) into view.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const target = nowX ?? (blocks.length > 0 ? minToX(toMinutes(blocks[0].start_time), start) : 0);
+    el.scrollLeft = Math.max(0, target - 160);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [day.id]);
+
+  const scrubFromPointer = (e: PointerEvent<HTMLDivElement>) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const x = e.clientX - el.getBoundingClientRect().left + el.scrollLeft - LABEL_W;
+    if (x < 0) {
+      onScrub(null);
+      return;
+    }
+    const min = Math.round((start + x / PX_PER_MIN) / SNAP_MIN) * SNAP_MIN;
+    onScrub(Math.max(start, Math.min(end, min)));
+  };
+
+  const isHot = (s: Session) =>
+    scrubMin !== null && toMinutes(s.start_time) <= scrubMin && scrubMin < toMinutes(s.end_time);
+
+  return (
+    <div
+      className={`board${scrubMin !== null ? ' is-scrubbing' : ''}`}
+      ref={scrollRef}
+      onPointerMove={scrubFromPointer}
+      onPointerLeave={() => onScrub(null)}
+      role="region"
+      aria-label={`${day.label} schedule board — rooms by time`}
+      tabIndex={0}
+    >
+      <div className="board-canvas" style={{ width: LABEL_W + gridW }}>
+        {/* time ruler */}
+        <div className="board-ruler" style={{ paddingLeft: LABEL_W }}>
+          {hours.map((m) => (
+            <div key={m} className="ruler-hour" style={{ left: LABEL_W + minToX(m, start) }}>
+              <span className="display ruler-num">{fmt(m)}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* hour gridlines */}
+        {hours.map((m) => (
+          <span key={m} className="board-hourline" style={{ left: LABEL_W + minToX(m, start) }} aria-hidden="true" />
+        ))}
+
+        {/* break bands spanning every room */}
+        {bands.map((b) => {
+          const x = minToX(toMinutes(b.start_time), start);
+          const w = minToX(toMinutes(b.end_time), start) - x;
+          return (
+            <div
+              key={b.id}
+              className={`board-band${live.liveIds.has(b.id) ? ' is-live' : ''}${isHot(b) ? ' is-hot' : ''}`}
+              style={{ left: LABEL_W + x, width: w }}
+            >
+              <span className="mono band-label">
+                {b.title} · {b.start_time}–{b.end_time}
+              </span>
+            </div>
+          );
+        })}
+
+        {/* room rows */}
+        <div className="board-rows">
+          {rooms.map((room) => (
+            <div className="board-row" key={room}>
+              <div className="row-label">
+                <span className="mono">{room}</span>
+              </div>
+              <div className="row-track" style={{ width: gridW }}>
+                {blocks
+                  .filter((s) => roomKey(s.room!) === room)
+                  .map((s) => {
+                    const x = minToX(toMinutes(s.start_time), start);
+                    const w = minToX(toMinutes(s.end_time), start) - x;
+                    const liveNow = live.liveIds.has(s.id);
+                    const next = live.nextIds.has(s.id);
+                    const classes = [
+                      'block',
+                      `block-${s.type}`,
+                      liveNow ? 'is-live' : '',
+                      next ? 'is-next' : '',
+                      isHot(s) ? 'is-hot' : '',
+                      dimmedIds.has(s.id) ? 'is-dimmed' : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ');
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        className={classes}
+                        style={{ left: x, width: Math.max(w - 4, 40) }}
+                        onClick={() => onOpen(s)}
+                        aria-label={`${s.code ?? ''} ${s.title}, ${s.start_time} to ${s.end_time}, ${s.room}`}
+                      >
+                        <span className="block-head">
+                          {s.code && <span className="mono block-code">{s.code}</span>}
+                          {liveNow && (
+                            <span className="mono block-live">
+                              <span className="live-dot" aria-hidden="true" /> LIVE
+                            </span>
+                          )}
+                          {!liveNow && next && <span className="mono block-next">NEXT</span>}
+                        </span>
+                        <span className="block-title">{s.title}</span>
+                        <span className="mono block-time">
+                          {s.start_time}–{s.end_time}
+                        </span>
+                      </button>
+                    );
+                  })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* live playhead */}
+        {nowX !== null && (
+          <div className="playhead" style={{ left: LABEL_W + nowX }} aria-hidden="true">
+            <span className="mono playhead-tag">
+              <span className="live-dot" /> NOW {clock.hhmm}
+            </span>
+          </div>
+        )}
+
+        {/* scrub cursor */}
+        {scrubMin !== null && (
+          <div className="scrub-cursor" style={{ left: LABEL_W + minToX(scrubMin, start) }} aria-hidden="true">
+            <span className="mono scrub-tag">{fmt(scrubMin)}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

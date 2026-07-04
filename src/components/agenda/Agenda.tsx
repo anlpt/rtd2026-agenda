@@ -1,132 +1,167 @@
 import { useMemo, useState } from 'react';
 import type { Day, Session, SessionType } from '../../types';
 import { dateParts, liveStatus, toMinutes, type ConferenceClock } from '../../lib/time';
+import { CONFERENCE_TIMEZONE } from '../../config';
 import { useReveal } from '../../hooks/useReveal';
-import { SessionCard } from './SessionCard';
+import { ScheduleBoard } from './ScheduleBoard';
 import { SessionModal } from './SessionModal';
 import './agenda.css';
 
 const TYPE_FILTERS: { value: SessionType | 'all'; label: string }[] = [
   { value: 'all', label: 'Everything' },
   { value: 'keynote', label: 'Keynotes' },
-  { value: 'special', label: 'Special sessions' },
-  { value: 'parallel', label: 'Parallel sessions' },
+  { value: 'special', label: 'Special' },
+  { value: 'parallel', label: 'Parallel' },
 ];
+
+const CLOCK_FMT = new Intl.DateTimeFormat('en-GB', {
+  timeZone: CONFERENCE_TIMEZONE,
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false,
+});
 
 interface Props {
   days: Day[];
   sessions: Session[];
   clock: ConferenceClock;
+  now: Date;
 }
 
-export function Agenda({ days, sessions, clock }: Props) {
+export function Agenda({ days, sessions, clock, now }: Props) {
   const [activeDayId, setActiveDayId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<SessionType | 'all'>('all');
-  const [roomFilter, setRoomFilter] = useState('all');
   const [query, setQuery] = useState('');
   const [openSession, setOpenSession] = useState<Session | null>(null);
+  const [scrubMin, setScrubMin] = useState<number | null>(null);
 
-  // Default to today when the conference is running, else the first day.
+  // Default to today while the conference runs, else the first day.
   const activeDay =
     days.find((d) => d.id === activeDayId) ?? days.find((d) => d.date === clock.date) ?? days[0];
 
   const live = liveStatus(activeDay, sessions, clock);
 
   const daySessions = useMemo(
-    () => sessions.filter((s) => s.day_id === activeDay?.id),
+    () =>
+      sessions
+        .filter((s) => s.day_id === activeDay?.id)
+        .sort((a, b) => toMinutes(a.start_time) - toMinutes(b.start_time) || a.sort - b.sort),
     [sessions, activeDay?.id],
   );
 
-  const rooms = useMemo(
-    () =>
-      [...new Set(daySessions.map((s) => s.room).filter((r): r is string => !!r))].sort((a, b) =>
-        a.localeCompare(b),
-      ),
-    [daySessions],
-  );
-
-  const filtering = typeFilter !== 'all' || roomFilter !== 'all' || query.trim() !== '';
-
-  const visible = useMemo(() => {
+  // Filters dim blocks instead of removing them, so the time geometry
+  // stays put and matches light up in place.
+  const dimmedIds = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return daySessions.filter((s) => {
-      if (typeFilter !== 'all' && s.type !== typeFilter) return false;
-      if (roomFilter !== 'all' && s.room !== roomFilter) return false;
-      if (filtering && (s.type === 'break' || s.type === 'ceremony') && (typeFilter !== 'all' || q)) {
-        if (typeFilter !== 'all') return false;
-      }
-      if (q) {
-        const haystack = [s.title, s.code, s.speaker, s.chair, s.panelists, s.room]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-        if (!haystack.includes(q)) return false;
-      }
-      return true;
-    });
-  }, [daySessions, typeFilter, roomFilter, query, filtering]);
-
-  const slots = useMemo(() => {
-    const byStart = new Map<string, Session[]>();
-    for (const s of visible) {
-      const list = byStart.get(s.start_time) ?? [];
-      list.push(s);
-      byStart.set(s.start_time, list);
+    const dimmed = new Set<string>();
+    if (typeFilter === 'all' && !q) return dimmed;
+    for (const s of daySessions) {
+      if (s.type === 'break') continue;
+      const typeMiss = typeFilter !== 'all' && s.type !== typeFilter;
+      const text = [s.title, s.code, s.speaker, s.chair, s.panelists, s.room]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      const queryMiss = q !== '' && !text.includes(q);
+      if (typeMiss || queryMiss) dimmed.add(s.id);
     }
-    return [...byStart.entries()]
-      .sort(([a], [b]) => toMinutes(a) - toMinutes(b))
-      .map(([time, list]) => ({ time, list: list.sort((a, b) => a.sort - b.sort) }));
-  }, [visible]);
+    return dimmed;
+  }, [daySessions, typeFilter, query]);
 
-  useReveal([activeDay?.id, typeFilter, roomFilter, query]);
+  const scrubCount = useMemo(() => {
+    if (scrubMin === null) return null;
+    return daySessions.filter(
+      (s) =>
+        s.type !== 'break' &&
+        !dimmedIds.has(s.id) &&
+        toMinutes(s.start_time) <= scrubMin &&
+        scrubMin < toMinutes(s.end_time),
+    ).length;
+  }, [scrubMin, daySessions, dimmedIds]);
+
+  useReveal([activeDay?.id]);
 
   if (!activeDay) return null;
+
+  const isToday = activeDay.date === clock.date;
 
   return (
     <section className="agenda" id="agenda" aria-label="Conference agenda">
       <div className="agenda-header">
         <p className="mono agenda-eyebrow" data-reveal>
-          Programme · Asia/Ho_Chi_Minh (GMT+7)
+          Programme · UEH Campus B · GMT+7
         </p>
         <h2 className="display agenda-heading" data-reveal>
-          The Agenda
+          Two days,
+          <br />
+          minute by minute
         </h2>
       </div>
 
-      <nav className="day-tabs" aria-label="Conference days">
-        {days.map((d) => {
-          const parts = dateParts(d.date);
-          const isActive = d.id === activeDay.id;
-          const isToday = d.date === clock.date;
-          return (
-            <button
-              key={d.id}
-              type="button"
-              className={`day-tab${isActive ? ' is-active' : ''}`}
-              aria-pressed={isActive}
-              onClick={() => setActiveDayId(d.id)}
-            >
-              <span className="display day-tab-num">{parts.dayNum}</span>
-              <span className="mono day-tab-label">
-                {parts.weekday} {parts.month} · {d.label}
-                {isToday && <em className="day-tab-today"> · today</em>}
+      {/* chronograph: the dates and the clock ARE the interface */}
+      <div className="chronograph" data-reveal>
+        <nav className="chrono-days" aria-label="Conference days">
+          {days.map((d) => {
+            const parts = dateParts(d.date);
+            const isActive = d.id === activeDay.id;
+            return (
+              <button
+                key={d.id}
+                type="button"
+                className={`chrono-day${isActive ? ' is-active' : ''}`}
+                aria-pressed={isActive}
+                onClick={() => {
+                  setActiveDayId(d.id);
+                  setScrubMin(null);
+                }}
+              >
+                <span className="display chrono-num">{parts.dayNum}</span>
+                <span className="mono chrono-meta">
+                  {parts.weekday} · {parts.month}
+                  <br />
+                  {d.label}
+                  {d.date === clock.date && <em className="chrono-today"> · today</em>}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="chrono-clock" role="status">
+          {scrubMin !== null ? (
+            <>
+              <span className="mono chrono-clock-label">At this time</span>
+              <span className="chrono-clock-time">
+                {`${String(Math.floor(scrubMin / 60)).padStart(2, '0')}:${String(scrubMin % 60).padStart(2, '0')}`}
               </span>
-            </button>
-          );
-        })}
-      </nav>
-
-      {live.isConferenceDay && live.liveIds.size > 0 && (
-        <div className="now-banner" role="status">
-          <span className="live-dot" aria-hidden="true" />
-          <span className="mono">
-            Happening now · {clock.hhmm} — {live.liveIds.size} session{live.liveIds.size > 1 ? 's' : ''} in
-            progress
-          </span>
+              <span className="mono chrono-clock-sub">
+                {scrubCount} session{scrubCount === 1 ? '' : 's'} on
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="mono chrono-clock-label">
+                {isToday && live.liveIds.size > 0 ? (
+                  <>
+                    <span className="live-dot" aria-hidden="true" /> Live · Ho Chi Minh City
+                  </>
+                ) : (
+                  'Ho Chi Minh City'
+                )}
+              </span>
+              <span className="chrono-clock-time">{CLOCK_FMT.format(now)}</span>
+              <span className="mono chrono-clock-sub">
+                {isToday && live.liveIds.size > 0
+                  ? `${live.liveIds.size} session${live.liveIds.size > 1 ? 's' : ''} in progress`
+                  : 'glide across the board to time-travel'}
+              </span>
+            </>
+          )}
         </div>
-      )}
+      </div>
 
-      <div className="agenda-filters">
+      <div className="agenda-filters" data-reveal>
         <div className="filter-chips" role="group" aria-label="Filter by session type">
           {TYPE_FILTERS.map((f) => (
             <button
@@ -140,71 +175,31 @@ export function Agenda({ days, sessions, clock }: Props) {
             </button>
           ))}
         </div>
-        <div className="filter-inputs">
-          <select
-            className="filter-select mono"
-            value={roomFilter}
-            onChange={(e) => setRoomFilter(e.target.value)}
-            aria-label="Filter by room"
-          >
-            <option value="all">All rooms</option>
-            {rooms.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
-          <input
-            type="search"
-            className="filter-search"
-            placeholder="Search titles, chairs, speakers…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            aria-label="Search the agenda"
-          />
-        </div>
+        <input
+          type="search"
+          className="filter-search"
+          placeholder="Search titles, chairs, speakers, rooms…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-label="Search the agenda"
+        />
       </div>
 
       <div className="day-content" key={activeDay.id}>
         <span className="day-wipe" aria-hidden="true" />
-        <h3 className="day-title" data-reveal>
-          <span className="mono">
-            {activeDay.label} — {activeDay.date}
-          </span>
-          {activeDay.title}
-        </h3>
-
-        {slots.length === 0 && (
-          <p className="agenda-empty">
-            Nothing matches these filters. Clear the search or pick another session type.
-          </p>
-        )}
-
-        <ol className="slot-list">
-          {slots.map((slot) => {
-            const hasLive = slot.list.some((s) => live.liveIds.has(s.id));
-            const hasNext = slot.list.some((s) => live.nextIds.has(s.id));
-            return (
-              <li className={`slot${hasLive ? ' slot-live' : ''}`} key={slot.time}>
-                <div className="slot-rail">
-                  <span className={`slot-node${hasLive ? ' is-live' : hasNext ? ' is-next' : ''}`} aria-hidden="true" />
-                  <span className="mono slot-time">{slot.time}</span>
-                </div>
-                <div className="slot-cards" data-reveal>
-                  {slot.list.map((session) => (
-                    <SessionCard
-                      key={session.id}
-                      session={session}
-                      isLive={live.liveIds.has(session.id)}
-                      isNext={live.nextIds.has(session.id)}
-                      onOpen={setOpenSession}
-                    />
-                  ))}
-                </div>
-              </li>
-            );
-          })}
-        </ol>
+        <ScheduleBoard
+          day={activeDay}
+          sessions={daySessions}
+          dimmedIds={dimmedIds}
+          live={live}
+          clock={clock}
+          scrubMin={scrubMin}
+          onScrub={setScrubMin}
+          onOpen={setOpenSession}
+        />
+        <p className="mono board-hint">
+          Rooms run top to bottom · time runs left to right · tap any block for details
+        </p>
       </div>
 
       {openSession && <SessionModal session={openSession} onClose={() => setOpenSession(null)} />}

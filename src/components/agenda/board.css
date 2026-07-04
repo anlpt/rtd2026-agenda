@@ -1,0 +1,351 @@
+/* ---------- chronograph schedule board ---------- */
+
+.board {
+  position: relative;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  background: var(--white);
+  border: 1px solid var(--ink-12);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  cursor: crosshair;
+  scrollbar-width: thin;
+  scrollbar-color: var(--red) var(--blush);
+}
+
+.board-canvas {
+  position: relative;
+  padding-bottom: var(--space-2);
+}
+
+/* ---- ruler ---- */
+
+.board-ruler {
+  position: relative;
+  height: 56px;
+  border-bottom: 1px solid var(--ink-12);
+  background:
+    repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent calc(10 * var(--ppm, 3.4px)) ,
+      transparent calc(10 * var(--ppm, 3.4px))
+    ),
+    var(--blush);
+}
+
+.ruler-hour {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+
+.ruler-hour::after {
+  content: '';
+  width: 1px;
+  height: 10px;
+  background: var(--ink);
+}
+
+.ruler-num {
+  font-size: 1.35rem;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+}
+
+/* ---- grid ---- */
+
+.board-hourline {
+  position: absolute;
+  top: 56px;
+  bottom: 0;
+  width: 1px;
+  background: var(--ink-12);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.board-rows {
+  position: relative;
+}
+
+.board-row {
+  display: flex;
+  height: 98px;
+  border-bottom: 1px solid var(--ink-12);
+}
+
+.board-row:last-child {
+  border-bottom: none;
+}
+
+.row-label {
+  position: sticky;
+  left: 0;
+  z-index: 6;
+  flex: 0 0 132px;
+  display: flex;
+  align-items: center;
+  padding-left: var(--space-3);
+  background: linear-gradient(to right, var(--blush) 88%, transparent);
+  border-right: 1px solid var(--ink-12);
+}
+
+.row-label .mono {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.row-track {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+/* ---- session blocks ---- */
+
+.block {
+  position: absolute;
+  top: 7px;
+  bottom: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  text-align: left;
+  border: 1px solid var(--ink-12);
+  border-radius: var(--radius);
+  background: var(--white);
+  padding: 6px 8px;
+  overflow: hidden;
+  transition:
+    transform var(--duration-fast) var(--ease-out-expo),
+    box-shadow var(--duration-fast) var(--ease-out-expo),
+    opacity var(--duration-normal) ease,
+    filter var(--duration-normal) ease;
+}
+
+.block:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(204, 32, 39, 0.22);
+  z-index: 5;
+  border-color: var(--red);
+}
+
+.block-head {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.block-code {
+  background: var(--red);
+  color: var(--white);
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 0.6rem;
+}
+
+.block-title {
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.block-time {
+  color: var(--ink-60);
+  font-size: 0.58rem;
+  margin-top: auto;
+}
+
+.block-keynote {
+  background: linear-gradient(120deg, var(--red), var(--red-deep));
+  border-color: var(--red-deep);
+  color: var(--white);
+}
+
+.block-keynote .block-code {
+  background: var(--white);
+  color: var(--red);
+}
+
+.block-keynote .block-time {
+  color: var(--white-70);
+}
+
+.block-ceremony {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--white);
+}
+
+.block-ceremony .block-time {
+  color: var(--white-70);
+}
+
+.block-special {
+  border-left: 3px solid var(--red);
+}
+
+.block-live,
+.block-next {
+  font-size: 0.58rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.block-live {
+  color: var(--red-glow);
+}
+
+.block-keynote .block-live {
+  color: var(--white);
+}
+
+.block-next {
+  color: var(--red);
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0 5px;
+}
+
+.block-keynote .block-next,
+.block-ceremony .block-next {
+  color: var(--white);
+}
+
+.block.is-live {
+  box-shadow: var(--shadow-live);
+  animation: block-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes block-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px var(--red), 0 0 18px rgba(204, 32, 39, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 2px var(--red), 0 0 34px rgba(204, 32, 39, 0.55);
+  }
+}
+
+/* scrub interaction: light the sessions under the cursor, hush the rest */
+.board.is-scrubbing .block:not(.is-hot) {
+  opacity: 0.32;
+  filter: saturate(0.4);
+}
+
+.block.is-hot {
+  z-index: 5;
+  border-color: var(--red);
+  box-shadow: 0 6px 24px rgba(204, 32, 39, 0.3);
+}
+
+.block.is-dimmed {
+  opacity: 0.13 !important;
+  filter: grayscale(1);
+  pointer-events: none;
+}
+
+/* ---- break bands ---- */
+
+.board-band {
+  position: absolute;
+  top: 56px;
+  bottom: 0;
+  background: repeating-linear-gradient(-55deg, var(--red-08) 0 8px, transparent 8px 16px);
+  border-left: 1px dashed var(--red-16);
+  border-right: 1px dashed var(--red-16);
+  display: flex;
+  justify-content: center;
+  padding-top: var(--space-3);
+  pointer-events: none;
+}
+
+.band-label {
+  writing-mode: vertical-rl;
+  color: var(--red);
+  opacity: 0.75;
+  font-size: 0.62rem;
+  white-space: nowrap;
+}
+
+.board-band.is-live {
+  background: repeating-linear-gradient(-55deg, var(--red-16) 0 8px, rgba(204, 32, 39, 0.04) 8px 16px);
+}
+
+/* ---- playhead & scrub cursor ---- */
+
+.playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--red);
+  z-index: 7;
+  pointer-events: none;
+  box-shadow: 0 0 14px rgba(204, 32, 39, 0.65);
+}
+
+.playhead-tag {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--red);
+  color: var(--white);
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-size: 0.6rem;
+}
+
+.playhead-tag .live-dot {
+  background: var(--white);
+}
+
+.scrub-cursor {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--ink);
+  z-index: 7;
+  pointer-events: none;
+}
+
+.scrub-tag {
+  position: absolute;
+  top: 30px;
+  left: 5px;
+  background: var(--ink);
+  color: var(--white);
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .board {
+    cursor: default;
+  }
+  .board-row {
+    height: 104px;
+  }
+  .row-label {
+    padding-left: var(--space-2);
+  }
+  .row-label .mono {
+    font-size: 0.6rem;
+  }
+}

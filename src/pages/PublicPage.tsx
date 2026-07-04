@@ -19,7 +19,7 @@ export function PublicPage() {
         </div>
       )}
       <main>
-        <Agenda days={days} sessions={sessions} clock={clock} />
+        <Agenda days={days} sessions={sessions} clock={clock} now={now} />
       </main>
       <footer className="site-footer">
         <div className="footer-inner">
