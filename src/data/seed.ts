@@ -1,0 +1,74 @@
+import type { AgendaData, Session } from '../types';
+
+// Seeded from the organising committee's spreadsheets (July 2026).
+// Time slots are the proposed schedule — edit them in the CMS.
+
+const DAY1 = 'day-1';
+const DAY2 = 'day-2';
+
+let n = 0;
+const s = (row: Omit<Session, 'id' | 'sort'>): Session => ({ ...row, id: `seed-${++n}`, sort: n });
+
+const day1Sessions: Session[] = [
+  s({ day_id: DAY1, type: 'break', code: null, title: 'Registration & Welcome Coffee', speaker: null, chair: null, panelists: null, room: 'Hall B1.302 Foyer', start_time: '08:00', end_time: '08:30', description: null, paper_count: null }),
+  s({ day_id: DAY1, type: 'ceremony', code: null, title: 'Opening Ceremony', speaker: null, chair: null, panelists: null, room: 'Hall B1.302', start_time: '08:30', end_time: '09:00', description: 'Welcome remarks from UEH University and the College of Technology and Design.', paper_count: null }),
+  s({ day_id: DAY1, type: 'keynote', code: 'K1', title: 'Unlocking Business Potential Through University Living Labs', speaker: 'Prof. Utz Dornberger — Director, SEPT Competence Center, Leipzig University', chair: null, panelists: null, room: 'Hall B1.302', start_time: '09:00', end_time: '09:40', description: null, paper_count: null }),
+  s({ day_id: DAY1, type: 'keynote', code: 'K2', title: 'The FutureScape of Smart City: Unlocking the Prospects and Trends for Developing Cities', speaker: 'Assoc. Prof. Tu Anh Trinh — Director, Institute of Smart City and Management, University of Economics Ho Chi Minh City', chair: null, panelists: null, room: 'Hall B1.302', start_time: '09:40', end_time: '10:20', description: null, paper_count: null }),
+  s({ day_id: DAY1, type: 'break', code: null, title: 'Coffee Break', speaker: null, chair: null, panelists: null, room: null, start_time: '10:20', end_time: '10:40', description: null, paper_count: null }),
+  s({ day_id: DAY1, type: 'keynote', code: 'K3', title: 'Data, Robotics, and Intelligence for Planetary Wellbeing', speaker: 'Prof. Bor-Jiunn Wen — Chair, Department of Mechanical and Mechatronic Engineering, National Taiwan Ocean University', chair: null, panelists: null, room: 'Hall B1.302', start_time: '10:40', end_time: '11:20', description: null, paper_count: null }),
+  s({ day_id: DAY1, type: 'special', code: 'SS1', title: 'FutureScape Netzero Transition: Interdisciplinary Development', speaker: null, chair: 'Dr. Vo Dao Chi — Institute of Smart City and Management, CTD-UEH', panelists: 'Prof. Dr. Frank Fichert; Prof. Dr. Jeongseob Kim; Dr. Cung Trong Cuong; Assoc. Prof. Nguyen Hong Quan', room: 'Hall B1.302', start_time: '11:20', end_time: '12:30', description: null, paper_count: null }),
+  s({ day_id: DAY1, type: 'special', code: 'SS2', title: 'FutureScape Cities: Designing the Next Urban Generation', speaker: null, chair: 'Assoc. Prof. Tu Anh Trinh — Director, Institute of Smart City and Management, CTD-UEH', panelists: 'Mr. Tran Anh Dung; Assoc. Prof. Ducksu Seo; Prof. Pawinee Iamtrakul; Mr. Clinton Moore', room: 'B1.205', start_time: '11:20', end_time: '12:30', description: null, paper_count: null }),
+  s({ day_id: DAY1, type: 'special', code: 'SS3', title: 'FutureScape Business: Intelligent Industry, Sustainable Mobility — Emerging Technologies Reshaping the Business Landscape', speaker: null, chair: 'Dr. Nguyen Quoc Khanh — Institute of Innovation, CTD-UEH', panelists: 'Dr. Ho Quang Truong; Dr. Ho Diep', room: 'B1.204', start_time: '11:20', end_time: '12:30', description: null, paper_count: null }),
+  s({ day_id: DAY1, type: 'special', code: 'SS4', title: 'FutureScape Creative Technology: Art, Media and Immersive Experiences', speaker: null, chair: 'Mr. Do Le Phuc Tam — Institute of Smart City and Management, CTD-UEH', panelists: 'Prof. LeeHwan Hwang; Dr. Filipa Martins; Dr. Dong Su Yi', room: 'B1.203', start_time: '11:20', end_time: '12:30', description: null, paper_count: null }),
+  s({ day_id: DAY1, type: 'break', code: null, title: 'Lunch', speaker: null, chair: null, panelists: null, room: null, start_time: '12:30', end_time: '13:30', description: null, paper_count: null }),
+  s({ day_id: DAY1, type: 'special', code: 'SS5', title: 'FutureScape Glocal Design: Research by Design for Vietnam Context', speaker: null, chair: 'Prof. Elena Marchigiani — Trieste University', panelists: 'Dr. Harvey Neo; Dr. Adrian Lo; Mr. Steven Petit; Mr. Jaillais Neliaz Martin Francois', room: 'Hall B1.302', start_time: '13:30', end_time: '14:40', description: null, paper_count: null }),
+  s({ day_id: DAY1, type: 'special', code: 'SS6', title: 'FutureScape Co-Creation: Living Labs and Collaborative Innovation', speaker: null, chair: 'Dr. Pham Nguyen Hoai — Institute of Smart City and Management, CTD-UEH', panelists: 'Prof. Dr. Utz Dornberger; Dr. Nguyen Anh Tuan; Prof. Dr. Erik Wende', room: 'B1.204', start_time: '13:30', end_time: '14:40', description: null, paper_count: null }),
+  s({ day_id: DAY1, type: 'special', code: 'SS7', title: 'FutureScape Frontier Intelligence: AI, Robotics and Digital Twins', speaker: null, chair: 'Prof. Truong Thinh Nguyen — Vice-Rector, CTD-UEH', panelists: 'Dr. Thien Bao Nguyen; Prof. Bor-Jiunn Wen; Prof. Fan-Bean Wu; Prof. Kim Yong-Guk', room: 'B1.205', start_time: '13:30', end_time: '14:40', description: null, paper_count: null }),
+  s({ day_id: DAY1, type: 'parallel', code: 'A1', title: 'Business Innovation and Sustainability', speaker: null, chair: 'Assoc. Prof. Le Thi Phuong Vy', panelists: null, room: 'B1.407 (40)', start_time: '14:40', end_time: '16:00', description: null, paper_count: 3 }),
+  s({ day_id: DAY1, type: 'parallel', code: 'A2', title: 'Co-creation, Innovation Ecosystems and Entrepreneurship', speaker: null, chair: 'Dr. Thai Kim Phung', panelists: null, room: 'B1.408 (40)', start_time: '14:40', end_time: '16:00', description: null, paper_count: 4 }),
+  s({ day_id: DAY1, type: 'parallel', code: 'A3', title: 'Art, Media, and Technology', speaker: null, chair: 'Assoc. Prof. Trinh Thuy Anh', panelists: null, room: 'B1.409 (50)', start_time: '14:40', end_time: '16:00', description: null, paper_count: 4 }),
+  s({ day_id: DAY1, type: 'parallel', code: 'A4', title: 'Data Analytics', speaker: null, chair: 'Prof. Nguyen Truong Thinh', panelists: null, room: 'B1.507 (40)', start_time: '14:40', end_time: '16:00', description: null, paper_count: 4 }),
+  s({ day_id: DAY1, type: 'parallel', code: 'B1', title: 'Blockchain and Fintech', speaker: null, chair: 'Assoc. Prof. Ngo Minh Vu', panelists: null, room: 'B1.307 (15)', start_time: '14:40', end_time: '16:00', description: null, paper_count: 3 }),
+  s({ day_id: DAY1, type: 'parallel', code: 'B2', title: 'Co-creation and Innovation Ecosystems', speaker: null, chair: 'Assoc. Prof. Do Thi Hai Ninh', panelists: null, room: 'B1.308 (15)', start_time: '14:40', end_time: '16:00', description: null, paper_count: 4 }),
+  s({ day_id: DAY1, type: 'parallel', code: 'B3', title: 'Smart and Sustainable City — Nature', speaker: null, chair: 'Mr. Han-Yi Hsiao', panelists: null, room: 'B1.403 (80)', start_time: '14:40', end_time: '16:00', description: null, paper_count: 4 }),
+  s({ day_id: DAY1, type: 'parallel', code: 'B4', title: 'Data Analytics', speaker: null, chair: 'Dr. Nguyen Ba Son', panelists: null, room: 'B1.309 (15)', start_time: '14:40', end_time: '16:00', description: null, paper_count: 3 }),
+  s({ day_id: DAY1, type: 'break', code: null, title: 'Coffee Break', speaker: null, chair: null, panelists: null, room: null, start_time: '16:00', end_time: '16:20', description: null, paper_count: null }),
+  s({ day_id: DAY1, type: 'parallel', code: 'C1', title: 'Climate Risk and Business Sustainability', speaker: null, chair: 'Dr. Nguyen Le Ngan Trang', panelists: null, room: 'B1.407 (40)', start_time: '16:20', end_time: '17:40', description: null, paper_count: 3 }),
+  s({ day_id: DAY1, type: 'parallel', code: 'C2', title: 'Innovation Ecosystems and Entrepreneurship', speaker: null, chair: 'Dr. Christopher Han', panelists: null, room: 'B1.408 (40)', start_time: '16:20', end_time: '17:40', description: null, paper_count: 3 }),
+  s({ day_id: DAY1, type: 'parallel', code: 'C3', title: 'Art, Media, and Technology in Sustainable Development', speaker: null, chair: 'Assoc. Prof. Trinh Thuy Anh', panelists: null, room: 'B1.409 (50)', start_time: '16:20', end_time: '17:40', description: null, paper_count: 4 }),
+  s({ day_id: DAY1, type: 'parallel', code: 'C4', title: 'Data, Robotics, and Intelligence', speaker: null, chair: 'Dr. Tri Dung Dang', panelists: null, room: 'B1.507 (40)', start_time: '16:20', end_time: '17:40', description: null, paper_count: 3 }),
+];
+
+const day2Sessions: Session[] = [
+  s({ day_id: DAY2, type: 'break', code: null, title: 'Registration & Welcome Coffee', speaker: null, chair: null, panelists: null, room: 'Hall B1.302 Foyer', start_time: '08:30', end_time: '09:00', description: null, paper_count: null }),
+  s({ day_id: DAY2, type: 'keynote', code: 'K4', title: 'Art, Media, and Technology in Sustainable Future', speaker: 'Prof. Haipeng Mi — Department of Information Art and Design, Tsinghua University', chair: null, panelists: null, room: 'Hall B1.302', start_time: '09:00', end_time: '09:40', description: null, paper_count: null }),
+  s({ day_id: DAY2, type: 'keynote', code: 'K5', title: "Culture as a Catalyst for Sustainable Development: Indonesia's Experience in Advancing Creativity, Innovation, and Digital Transformation", speaker: 'Ms. Carolina Tinangon — Consul General, Consulate General of the Republic of Indonesia', chair: null, panelists: null, room: 'Hall B1.302', start_time: '09:40', end_time: '10:20', description: null, paper_count: null }),
+  s({ day_id: DAY2, type: 'break', code: null, title: 'Coffee Break', speaker: null, chair: null, panelists: null, room: null, start_time: '10:20', end_time: '10:40', description: null, paper_count: null }),
+  s({ day_id: DAY2, type: 'special', code: 'SS8', title: 'Creative Industries and Culture-Led Innovation: Empowering the Next Generation', speaker: null, chair: 'Prof. Thuy Anh Trinh — Rector, CTD-UEH', panelists: 'Dr. Nurul Hanim Romainoor; Mr. Phillip Friesen; Mr. Le Gia Phong', room: 'Hall B1.302', start_time: '10:40', end_time: '12:00', description: null, paper_count: null }),
+  s({ day_id: DAY2, type: 'special', code: 'SS9', title: 'FutureScape Mobility: Sustainable Transportation and the Role of DRT in Smart Mobility Ecosystems', speaker: null, chair: 'Dr. Quang Tran Vuong — Institute of Smart City and Management, CTD-UEH', panelists: 'Dr. Junggon Sung; Dr. Youngjin Yuk; Mr. Hoyoon Lee; Dr. Pham Nguyen Hoai; Ms. Emma Thao Nguyen; Ms. Bui Thu Hien', room: 'B1.204', start_time: '10:40', end_time: '12:00', description: null, paper_count: null }),
+  s({ day_id: DAY2, type: 'special', code: 'SS10', title: 'FutureScape Smart Township: A New Urban Development for a Sustainable Community', speaker: null, chair: 'Dr. Tran Khac Minh — Institute of Smart City and Management, CTD-UEH', panelists: 'Mr. Hyo-jun Kim; Mr. Cho Kwanphil; Dr. Christopher Han', room: 'B1.203', start_time: '10:40', end_time: '12:00', description: null, paper_count: null }),
+  s({ day_id: DAY2, type: 'special', code: 'SS11', title: 'FutureScape Artificial Intelligence: AI & Intelligent Systems in Business', speaker: null, chair: 'Dr. Nguyen Van Du — School of Business Information Technology, CTD-UEH', panelists: 'Dr. Ngo Tan Vu Khanh; Prof. Parisa Kordjamshidi; Dr. Nguyen Thanh Huy', room: 'B1.205', start_time: '10:40', end_time: '12:00', description: null, paper_count: null }),
+  s({ day_id: DAY2, type: 'break', code: null, title: 'Lunch', speaker: null, chair: null, panelists: null, room: null, start_time: '12:00', end_time: '13:30', description: null, paper_count: null }),
+  s({ day_id: DAY2, type: 'parallel', code: 'D1', title: 'Business Innovation and Sustainability', speaker: null, chair: 'Prof. Utz Dornberger', panelists: null, room: 'B1.407 (40)', start_time: '13:30', end_time: '14:50', description: null, paper_count: 4 }),
+  s({ day_id: DAY2, type: 'parallel', code: 'D2', title: 'Co-creation, Innovation Ecosystems and Entrepreneurship', speaker: null, chair: 'Dr. Bui Thanh Hieu', panelists: null, room: 'B1.408 (40)', start_time: '13:30', end_time: '14:50', description: null, paper_count: 4 }),
+  s({ day_id: DAY2, type: 'parallel', code: 'D3', title: 'Media and Technology', speaker: null, chair: 'Dr. Nhieu Nhat Luong', panelists: null, room: 'B1.409 (50)', start_time: '13:30', end_time: '14:50', description: null, paper_count: 4 }),
+  s({ day_id: DAY2, type: 'parallel', code: 'D4', title: 'Machine Vision and Interactive Designs', speaker: null, chair: 'Dr. Tri Cuong Do', panelists: null, room: 'B1.507 (40)', start_time: '13:30', end_time: '14:50', description: null, paper_count: 3 }),
+  s({ day_id: DAY2, type: 'break', code: null, title: 'Coffee Break', speaker: null, chair: null, panelists: null, room: null, start_time: '14:50', end_time: '15:10', description: null, paper_count: null }),
+  s({ day_id: DAY2, type: 'parallel', code: 'E1', title: 'Business Innovation', speaker: null, chair: 'Assoc. Prof. Nguyen Thi Hong Nham', panelists: null, room: 'B1.407 (40)', start_time: '15:10', end_time: '16:30', description: null, paper_count: 4 }),
+  s({ day_id: DAY2, type: 'parallel', code: 'E2', title: 'Multidisciplinary Research for Sustainability', speaker: null, chair: 'Dr. Trinh Duc Cuong', panelists: null, room: 'B1.408 (40)', start_time: '15:10', end_time: '16:30', description: null, paper_count: 4 }),
+  s({ day_id: DAY2, type: 'parallel', code: 'E3', title: 'Smart and Sustainable City I', speaker: null, chair: 'Prof. Pawinee Imtrakul', panelists: null, room: 'B1.409 (50)', start_time: '15:10', end_time: '16:30', description: null, paper_count: 4 }),
+  s({ day_id: DAY2, type: 'parallel', code: 'E4', title: 'Smart and Sustainable City II', speaker: null, chair: 'Dr. Ducksu Seo', panelists: null, room: 'B1.204 (60)', start_time: '15:10', end_time: '16:30', description: null, paper_count: 4 }),
+  s({ day_id: DAY2, type: 'ceremony', code: null, title: 'Closing Ceremony & Best Paper Awards', speaker: null, chair: null, panelists: null, room: 'Hall B1.302', start_time: '16:30', end_time: '17:00', description: 'Conference wrap-up, best paper awards and announcement of the post-conference programme (17–20 July).', paper_count: null }),
+];
+
+export const seedData: AgendaData = {
+  days: [
+    { id: DAY1, date: '2026-07-15', label: 'Day 1', title: 'Keynotes, FutureScape Sessions & Tracks A–C', sort: 1 },
+    { id: DAY2, date: '2026-07-16', label: 'Day 2', title: 'Keynotes, FutureScape Sessions & Tracks D–E', sort: 2 },
+  ],
+  sessions: [...day1Sessions, ...day2Sessions],
+  settings: {
+    hero_tagline: 'The 3rd International Conference on Resilience by Technology and Design',
+    announcement: '',
+  },
+};

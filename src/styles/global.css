@@ -1,0 +1,158 @@
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--blush);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+::selection {
+  background: var(--red);
+  color: var(--white);
+}
+
+:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+
+/* ------- shared primitives ------- */
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 0.96;
+}
+
+/* Scroll reveal */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity var(--duration-slow) var(--ease-out-expo),
+    transform var(--duration-slow) var(--ease-out-expo);
+}
+
+[data-reveal].revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* Announcement banner */
+.announcement {
+  background: var(--ink);
+  color: var(--white);
+  padding: var(--space-2) var(--rail);
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+}
+
+.announcement .mono {
+  color: var(--red-glow);
+  flex-shrink: 0;
+}
+
+/* Footer */
+.site-footer {
+  background: var(--ink);
+  color: var(--white);
+  padding: var(--space-5) var(--rail) var(--space-4);
+  position: relative;
+  overflow: hidden;
+}
+
+.site-footer::before {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 140%;
+  background:
+    linear-gradient(to top, rgba(204, 32, 39, 0.35), transparent 55%),
+    radial-gradient(120% 55% at 50% 118%, rgba(255, 255, 255, 0.22), transparent 60%);
+  pointer-events: none;
+}
+
+.footer-inner {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-5);
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.footer-title {
+  font-size: clamp(1.6rem, 1rem + 2.4vw, 2.6rem);
+  color: var(--white);
+}
+
+.footer-title span {
+  color: var(--red-glow);
+}
+
+.footer-meta {
+  display: grid;
+  gap: var(--space-2);
+  color: var(--white-70);
+  font-size: var(--text-sm);
+}
+
+.footer-meta a {
+  color: var(--white);
+  text-decoration-color: var(--red-glow);
+  text-underline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
