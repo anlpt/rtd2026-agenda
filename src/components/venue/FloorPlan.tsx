@@ -45,11 +45,21 @@ export function FloorPlan({ floor, selectedRoomId, onSelect }: Props) {
             />
           )}
           <rect className="room-fill" x={r.rect.x} y={r.rect.y} width={r.rect.w} height={r.rect.h} rx="1.5" />
-          {r.interactive && (
-            <text x={r.rect.x + r.rect.w / 2} y={r.rect.y + r.rect.h / 2 + 2.5}>
-              {r.label.replace('Hall ', '').replace(' & B1.306', '')}
-            </text>
-          )}
+          {r.interactive &&
+            (() => {
+              const label = r.label.replace('Hall ', '').replace(' & B1.306', '');
+              // size the label so it always sits inside the room box
+              const fontSize = Math.max(4.2, Math.min(8.5, (r.rect.w - 5) / (label.length * 0.6)));
+              return (
+                <text
+                  x={r.rect.x + r.rect.w / 2}
+                  y={r.rect.y + r.rect.h / 2 + fontSize * 0.34}
+                  style={{ fontSize: `${fontSize}px` }}
+                >
+                  {label}
+                </text>
+              );
+            })()}
         </g>
       ))}
     </svg>

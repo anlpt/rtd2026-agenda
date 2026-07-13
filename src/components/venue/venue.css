@@ -179,9 +179,51 @@
   /* headroom for the exploded upper floors + offset for the rotated bbox */
   margin: 120px 0 70px 90px;
   transform-style: preserve-3d;
-  /* --tilt / --spin driven by JS for idle drift + pointer parallax */
+  /* --tilt / --spin driven by JS for idle drift + drag-orbit */
   transform: rotateX(calc(55deg + var(--tilt, 0deg))) rotateZ(calc(-38deg + var(--spin, 0deg)));
-  transition: transform 0.12s linear;
+  transition: transform 0.3s var(--ease-out-expo);
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.venue-stack:active {
+  cursor: grabbing;
+}
+
+/* Overview: floors are the click target (drill in); rooms wait for focus. */
+.venue-stack:not(.is-focused) .floor-room {
+  pointer-events: none;
+}
+
+/* Focus mode: the chosen floor flies to front and faces the viewer. */
+.venue-stack.is-focused {
+  transition: transform 0.65s var(--ease-out-expo);
+  transform: rotateX(3deg) rotateZ(0deg) translateY(-8px) scale(1.05);
+  cursor: default;
+}
+
+.venue-stack.is-focused .venue-floor {
+  /* drop the load animation so its held final state stops overriding
+     the focus transform/opacity below */
+  animation: none;
+  transition:
+    transform 0.6s var(--ease-out-expo),
+    opacity 0.45s ease;
+}
+
+.venue-stack.is-focused .venue-floor:not(.is-front) {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateZ(calc(var(--i) * 78px)) scale(0.92);
+}
+
+.venue-stack.is-focused .venue-floor.is-front {
+  transform: translateZ(calc(var(--i) * 78px + 30px));
+  z-index: 6;
+}
+
+.venue-stack.is-focused .venue-floor.is-front .floor-room.is-clickable {
+  pointer-events: auto;
 }
 
 /* view-switch mount transition (3D <-> floor by floor) */
@@ -220,16 +262,17 @@
   }
 }
 
-/* Hovering a floor pops it clearly forward so its rooms are unobstructed. */
-.venue-floor:hover,
-.venue-floor.is-active {
+/* Hovering a floor pops it clearly forward (overview only). */
+.venue-stack:not(.is-focused) .venue-floor:hover,
+.venue-stack:not(.is-focused) .venue-floor.is-active {
   transform: translateZ(calc(var(--i) * 78px + 46px));
   z-index: 5;
+  cursor: pointer;
 }
 
 /* Lock pointer to the floor actually under the cursor — back floors can't
    steal the click through their projected overlap. */
-.venue-stack:hover .venue-floor:not(:hover) {
+.venue-stack:not(.is-focused):hover .venue-floor:not(:hover) {
   pointer-events: none;
 }
 
@@ -263,8 +306,7 @@
 
 .floor-room text {
   font-family: var(--font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.01em;
   text-anchor: middle;
   pointer-events: none;
 }
@@ -292,6 +334,42 @@
     transform: scale(1.06);
     filter: brightness(1.35);
   }
+}
+
+/* focus-mode side bar (replaces the legend while drilled into a floor) */
+.venue-focus-bar {
+  display: grid;
+  gap: var(--space-3);
+  align-content: center;
+  min-width: 190px;
+  position: relative;
+  z-index: 2;
+  animation: view-in 0.4s var(--ease-out-expo) both;
+}
+
+.venue-back {
+  justify-self: start;
+  background: transparent;
+  border: 1px solid var(--ink-30);
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  color: var(--ink-60);
+  transition: all var(--duration-fast) ease;
+}
+
+.venue-back:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.venue-focus-label {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.venue-focus-hint {
+  color: var(--red);
 }
 
 /* screen-space floor legend */
@@ -656,6 +734,20 @@
 
 .venue-hologram .legend-note {
   color: var(--white-70);
+}
+
+.venue-hologram .venue-back {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: var(--white-70);
+}
+
+.venue-hologram .venue-back:hover {
+  border-color: var(--red-glow);
+  color: var(--red-glow);
+}
+
+.venue-hologram .venue-focus-hint {
+  color: var(--red-glow);
 }
 
 .venue-hologram .legend-upper {

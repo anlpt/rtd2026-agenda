@@ -32,12 +32,14 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
   const [view, setView] = useState<VenueView>('stack');
   const [selected, setSelected] = useState<Selection | null>(null);
   const [hoverFloor, setHoverFloor] = useState<string | null>(null);
+  // The floor drilled into (stack view): null = exploded overview.
+  const [focusedFloorId, setFocusedFloorId] = useState<string | null>(null);
   const stackRef = useRef<HTMLDivElement>(null);
-  const pointer = useRef({ x: 0, y: 0 });
+  const spin = useRef({ base: 0, drag: null as null | { startX: number; startBase: number }, moved: false });
 
-  useReveal([view]);
+  useReveal([view, focusedFloorId]);
 
-  // Living hologram: gentle idle drift + pointer parallax on the 3D stack.
+  // Living hologram: drag-to-orbit + gentle idle sway on the 3D overview.
   useEffect(() => {
     if (view !== 'stack') return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -45,29 +47,54 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
     const start = performance.now();
     const tick = (t: number) => {
       const el = stackRef.current;
-      if (el) {
+      if (el && !focusedFloorId) {
         const e = (t - start) / 1000;
-        const tilt = Math.sin(e * 0.5) * 2.2 + pointer.current.y * 2;
-        const spin = Math.cos(e * 0.35) * 2.6 + pointer.current.x * 3;
+        const dragging = spin.current.drag !== null;
+        const sway = dragging ? 0 : Math.cos(e * 0.32) * 2.4;
+        const tilt = dragging ? 0 : Math.sin(e * 0.45) * 1.8;
+        el.style.setProperty('--spin', `${(spin.current.base + sway).toFixed(2)}deg`);
         el.style.setProperty('--tilt', `${tilt.toFixed(2)}deg`);
-        el.style.setProperty('--spin', `${spin.toFixed(2)}deg`);
       }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [view]);
+  }, [view, focusedFloorId]);
 
-  const onScenePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    pointer.current = {
-      x: (e.clientX - r.left) / r.width - 0.5,
-      y: (e.clientY - r.top) / r.height - 0.5,
-    };
+  // Drag to orbit (overview only).
+  const onStackPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (focusedFloorId) return;
+    spin.current.drag = { startX: e.clientX, startBase: spin.current.base };
+    spin.current.moved = false;
+  };
+  const onStackPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = spin.current.drag;
+    if (!d) return;
+    const dx = e.clientX - d.startX;
+    if (Math.abs(dx) > 6) spin.current.moved = true;
+    spin.current.base = d.startBase + dx * 0.45;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches && stackRef.current) {
+      stackRef.current.style.setProperty('--spin', `${spin.current.base}deg`);
+    }
+  };
+  const endStackDrag = () => {
+    spin.current.drag = null;
   };
 
+  // Drill in only on a genuine click (not the end of an orbit drag).
+  const onFloorClick = (floorId: string) => {
+    if (focusedFloorId || spin.current.moved) return;
+    focusFloor(floorId);
+  };
+
+  const focusFloor = (floorId: string) => {
+    setFocusedFloorId(floorId);
+    setHoverFloor(null);
+  };
+  const exitFocus = () => setFocusedFloorId(null);
+
   // External focus (from a session's "view in the 3D map" button):
-  // select the room and, in floor view, bring its floor on screen.
+  // select the room and drill into its floor / scroll it into view.
   useEffect(() => {
     if (!focus) return;
     const key = normalize(focus.label);
@@ -79,6 +106,8 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
           window.setTimeout(() => {
             document.getElementById(`floor-${floor.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }, 150);
+        } else {
+          setFocusedFloorId(floor.id);
         }
         return;
       }
@@ -88,6 +117,7 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focus?.n]);
 
+  const focusedFloor = VENUE_FLOORS.find((f) => f.id === focusedFloorId) ?? null;
   const selectedLabel = selected?.room?.label ?? selected?.side?.label ?? null;
 
   const roomSessions = useMemo(() => {
@@ -150,21 +180,32 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
 
       <div className="venue-body">
         {view === 'stack' ? (
-          <div className="venue-scene" data-reveal onPointerMove={onScenePointerMove}>
-            <div className="venue-stack" role="list" ref={stackRef}>
+          <div className={`venue-scene${focusedFloorId ? ' is-focused' : ''}`} data-reveal>
+            <div
+              className={`venue-stack${focusedFloorId ? ' is-focused' : ''}`}
+              role="list"
+              ref={stackRef}
+              onPointerDown={onStackPointerDown}
+              onPointerMove={onStackPointerMove}
+              onPointerUp={endStackDrag}
+              onPointerLeave={endStackDrag}
+            >
               {[...VENUE_FLOORS].reverse().map((floor) => {
+                const isFront = focusedFloorId === floor.id;
                 const isActive =
-                  hoverFloor === floor.id || (selected?.kind === 'room' && selected.floorLabel === floor.label);
+                  !focusedFloorId &&
+                  (hoverFloor === floor.id || (selected?.kind === 'room' && selected.floorLabel === floor.label));
                 return (
                   <div
                     key={floor.id}
                     role="listitem"
-                    className={`venue-floor${isActive ? ' is-active' : ''}${
-                      selected && !isActive ? ' is-muted' : ''
+                    className={`venue-floor${isFront ? ' is-front' : ''}${isActive ? ' is-active' : ''}${
+                      !focusedFloorId && selected && !isActive ? ' is-muted' : ''
                     }`}
                     style={{ ['--i' as string]: floor.level }}
-                    onPointerEnter={() => setHoverFloor(floor.id)}
+                    onPointerEnter={() => !focusedFloorId && setHoverFloor(floor.id)}
                     onPointerLeave={() => setHoverFloor(null)}
+                    onClick={() => onFloorClick(floor.id)}
                   >
                     <FloorPlan
                       floor={floor}
@@ -177,24 +218,38 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
               <span className="venue-scan" aria-hidden="true" />
             </div>
 
-            <ul className="venue-legend">
-              <li className="legend-upper mono">{UPPER_FLOORS_NOTE}</li>
-              {[...VENUE_FLOORS].reverse().map((floor) => {
-                const isActive =
-                  hoverFloor === floor.id || (selected?.kind === 'room' && selected.floorLabel === floor.label);
-                return (
-                  <li
-                    key={floor.id}
-                    className={isActive ? 'is-active' : ''}
-                    onPointerEnter={() => setHoverFloor(floor.id)}
-                    onPointerLeave={() => setHoverFloor(null)}
-                  >
-                    <em className="display legend-num">{floor.short}</em>
-                    <span className="mono legend-note">{floor.note}</span>
-                  </li>
-                );
-              })}
-            </ul>
+            {focusedFloor ? (
+              <div className="venue-focus-bar">
+                <button type="button" className="venue-back mono" onClick={exitFocus}>
+                  ‹ All floors
+                </button>
+                <div className="venue-focus-label">
+                  <em className="display legend-num">{focusedFloor.short}</em>
+                  <span className="mono legend-note">{focusedFloor.note}</span>
+                </div>
+                <p className="mono venue-focus-hint">Tap a room</p>
+              </div>
+            ) : (
+              <ul className="venue-legend">
+                <li className="legend-upper mono">{UPPER_FLOORS_NOTE}</li>
+                {[...VENUE_FLOORS].reverse().map((floor) => {
+                  const isActive =
+                    hoverFloor === floor.id || (selected?.kind === 'room' && selected.floorLabel === floor.label);
+                  return (
+                    <li
+                      key={floor.id}
+                      className={isActive ? 'is-active' : ''}
+                      onPointerEnter={() => setHoverFloor(floor.id)}
+                      onPointerLeave={() => setHoverFloor(null)}
+                      onClick={() => focusFloor(floor.id)}
+                    >
+                      <em className="display legend-num">{floor.short}</em>
+                      <span className="mono legend-note">{floor.note}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         ) : (
           <div className="venue-floors" data-reveal>
