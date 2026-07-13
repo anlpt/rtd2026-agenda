@@ -28,10 +28,19 @@ export function useAgenda(): AgendaState {
       console.error('Agenda fetch failed', days.error ?? sessions.error ?? settings.error);
       return;
     }
-    if ((days.data?.length ?? 0) === 0) return; // empty project — keep seed
+    const liveDays = days.data ?? [];
+    const liveSessions = sessions.data ?? [];
+    // Empty or stale live projects should not hide the bundled PDF agenda.
+    // Once Supabase has been reseeded with the full programme, live CMS rows
+    // take over again.
+    if (liveDays.length < seedData.days.length || liveSessions.length < seedData.sessions.length) {
+      setData(seedData);
+      setSource('seed');
+      return;
+    }
     setData({
-      days: days.data,
-      sessions: sessions.data ?? [],
+      days: liveDays,
+      sessions: liveSessions,
       settings: Object.fromEntries((settings.data ?? []).map((r) => [r.key, r.value])),
     });
     setSource('live');
