@@ -34,10 +34,25 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
   const [hoverFloor, setHoverFloor] = useState<string | null>(null);
   // The floor drilled into (stack view): null = exploded overview.
   const [focusedFloorId, setFocusedFloorId] = useState<string | null>(null);
+  const [mapTransitioning, setMapTransitioning] = useState(false);
   const stackRef = useRef<HTMLDivElement>(null);
+  const transitionTimer = useRef<number | null>(null);
   const spin = useRef({ base: 0, drag: null as null | { startX: number; startBase: number }, moved: false });
 
   useReveal([view, focusedFloorId]);
+
+  useEffect(() => {
+    return () => {
+      if (transitionTimer.current) window.clearTimeout(transitionTimer.current);
+    };
+  }, []);
+
+  const cueMapTransition = () => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (transitionTimer.current) window.clearTimeout(transitionTimer.current);
+    setMapTransitioning(true);
+    transitionTimer.current = window.setTimeout(() => setMapTransitioning(false), 1350);
+  };
 
   // Living hologram: drag-to-orbit + gentle idle sway on the 3D overview.
   useEffect(() => {
@@ -88,10 +103,14 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
   };
 
   const focusFloor = (floorId: string) => {
+    cueMapTransition();
     setFocusedFloorId(floorId);
     setHoverFloor(null);
   };
-  const exitFocus = () => setFocusedFloorId(null);
+  const exitFocus = () => {
+    cueMapTransition();
+    setFocusedFloorId(null);
+  };
 
   // External focus (from a session's "view in the 3D map" button):
   // select the room and drill into its floor / scroll it into view.
@@ -107,7 +126,7 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
             document.getElementById(`floor-${floor.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }, 150);
         } else {
-          setFocusedFloorId(floor.id);
+          focusFloor(floor.id);
         }
         return;
       }
@@ -180,7 +199,12 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
 
       <div className="venue-body">
         {view === 'stack' ? (
-          <div className={`venue-scene${focusedFloorId ? ' is-focused' : ''}`} data-reveal>
+          <div
+            className={`venue-scene revealed${focusedFloorId ? ' is-focused' : ''}${
+              mapTransitioning ? ' is-transitioning' : ''
+            }`}
+            data-reveal
+          >
             <div
               className={`venue-stack${focusedFloorId ? ' is-focused' : ''}`}
               role="list"
