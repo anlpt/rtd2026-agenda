@@ -37,7 +37,13 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
   const [mapTransitioning, setMapTransitioning] = useState(false);
   const stackRef = useRef<HTMLDivElement>(null);
   const transitionTimer = useRef<number | null>(null);
-  const spin = useRef({ base: 0, drag: null as null | { startX: number; startBase: number }, moved: false });
+  const spin = useRef({
+    base: 0,
+    drag: null as null | { startX: number; startBase: number },
+    hovered: false,
+    lastT: 0,
+    moved: false,
+  });
 
   useReveal([view, focusedFloorId]);
 
@@ -54,7 +60,7 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
     transitionTimer.current = window.setTimeout(() => setMapTransitioning(false), 1350);
   };
 
-  // Living hologram: drag-to-orbit + gentle idle sway on the 3D overview.
+  // Living hologram: auto-orbit the overview, pausing on hover or drag.
   useEffect(() => {
     if (view !== 'stack') return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -63,13 +69,18 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
     const tick = (t: number) => {
       const el = stackRef.current;
       if (el && !focusedFloorId) {
+        const dt = spin.current.lastT ? (t - spin.current.lastT) / 1000 : 0;
         const e = (t - start) / 1000;
         const dragging = spin.current.drag !== null;
-        const sway = dragging ? 0 : Math.cos(e * 0.32) * 2.4;
+        if (!dragging && !spin.current.hovered) {
+          spin.current.base += dt * 5.5;
+        }
+        const sway = dragging || spin.current.hovered ? 0 : Math.cos(e * 0.32) * 1.4;
         const tilt = dragging ? 0 : Math.sin(e * 0.45) * 1.8;
         el.style.setProperty('--spin', `${(spin.current.base + sway).toFixed(2)}deg`);
         el.style.setProperty('--tilt', `${tilt.toFixed(2)}deg`);
       }
+      spin.current.lastT = t;
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -94,6 +105,13 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
   };
   const endStackDrag = () => {
     spin.current.drag = null;
+  };
+  const pauseStackOrbit = () => {
+    spin.current.hovered = true;
+  };
+  const resumeStackOrbit = () => {
+    spin.current.hovered = false;
+    endStackDrag();
   };
 
   // Drill in only on a genuine click (not the end of an orbit drag).
@@ -212,7 +230,8 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
               onPointerDown={onStackPointerDown}
               onPointerMove={onStackPointerMove}
               onPointerUp={endStackDrag}
-              onPointerLeave={endStackDrag}
+              onPointerEnter={pauseStackOrbit}
+              onPointerLeave={resumeStackOrbit}
             >
               {[...VENUE_FLOORS].reverse().map((floor) => {
                 const isFront = focusedFloorId === floor.id;
