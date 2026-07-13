@@ -144,6 +144,13 @@ button {
   text-underline-offset: 3px;
 }
 
+.footer-note {
+  max-width: 62ch;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--white-70);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

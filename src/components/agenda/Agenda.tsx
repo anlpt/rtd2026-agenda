@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Day, Session, SessionType } from '../../types';
 import { dateParts, liveStatus, toMinutes, type ConferenceClock } from '../../lib/time';
 import { CONFERENCE_TIMEZONE } from '../../config';
@@ -27,14 +27,24 @@ interface Props {
   sessions: Session[];
   clock: ConferenceClock;
   now: Date;
+  /** Set by the venue map — focuses the board's search on a room. */
+  roomFocus?: { q: string; n: number } | null;
+  /** Jump to the 3D venue map with a room selected. */
+  onLocateRoom?: (room: string) => void;
 }
 
-export function Agenda({ days, sessions, clock, now }: Props) {
+export function Agenda({ days, sessions, clock, now, roomFocus, onLocateRoom }: Props) {
   const [activeDayId, setActiveDayId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<SessionType | 'all'>('all');
   const [query, setQuery] = useState('');
   const [openSession, setOpenSession] = useState<Session | null>(null);
   const [scrubMin, setScrubMin] = useState<number | null>(null);
+
+  // The venue map can push a room name into the search box.
+  useEffect(() => {
+    if (roomFocus) setQuery(roomFocus.q);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomFocus?.n]);
 
   // Default to today while the conference runs, else the first day.
   const activeDay =
@@ -197,12 +207,11 @@ export function Agenda({ days, sessions, clock, now }: Props) {
           onScrub={setScrubMin}
           onOpen={setOpenSession}
         />
-        <p className="mono board-hint">
-          Rooms run top to bottom · time runs left to right · tap any block for details
-        </p>
       </div>
 
-      {openSession && <SessionModal session={openSession} onClose={() => setOpenSession(null)} />}
+      {openSession && (
+        <SessionModal session={openSession} onClose={() => setOpenSession(null)} onLocate={onLocateRoom} />
+      )}
     </section>
   );
 }

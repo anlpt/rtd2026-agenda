@@ -13,7 +13,7 @@ create table if not exists public.days (
 create table if not exists public.sessions (
   id text primary key,
   day_id text not null references public.days (id) on delete cascade,
-  type text not null check (type in ('keynote', 'special', 'parallel', 'break', 'ceremony')),
+  type text not null check (type in ('keynote', 'special', 'parallel', 'break', 'ceremony', 'showcase')),
   code text,
   title text not null,
   speaker text,
@@ -24,8 +24,18 @@ create table if not exists public.sessions (
   end_time text not null,
   description text,
   paper_count integer,
+  papers jsonb,
   sort integer not null default 0
 );
+
+-- Idempotent upgrades for databases created before these columns existed.
+alter table public.sessions add column if not exists papers jsonb;
+do $$
+begin
+  alter table public.sessions drop constraint if exists sessions_type_check;
+  alter table public.sessions add constraint sessions_type_check
+    check (type in ('keynote', 'special', 'parallel', 'break', 'ceremony', 'showcase'));
+end $$;
 
 create table if not exists public.settings (
   key text primary key,

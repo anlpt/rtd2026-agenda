@@ -41,7 +41,10 @@ interface Props {
 
 export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin, onScrub, onOpen }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const shellRef = useRef<HTMLDivElement>(null);
   const [ppm, setPpm] = useState(3);
+  const [rowH, setRowH] = useState(76);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [overflow, setOverflow] = useState({ left: false, right: false });
 
   const { start, end } = useMemo(() => boardRange(sessions), [sessions]);
@@ -54,7 +57,13 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
 
   const rooms = useMemo(() => {
     const keys = [...new Set(blocks.map((b) => roomKey(b.room)))];
-    const rank = (k: string) => (k.toLowerCase().startsWith('hall') ? 0 : k === ROOM_TBA ? 2 : 1);
+    const rank = (k: string) => {
+      const low = k.toLowerCase();
+      if (low.startsWith('hall')) return 0;
+      if (low.startsWith('lobby')) return 1;
+      if (k === ROOM_TBA) return 9;
+      return low.startsWith('b1') ? 2 : 3;
+    };
     return keys.sort((a, b) => rank(a) - rank(b) || a.localeCompare(b, undefined, { numeric: true }));
   }, [blocks]);
 
@@ -81,6 +90,31 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
     ro.observe(el);
     return () => ro.disconnect();
   }, [duration]);
+
+  // Fit every room row into the viewport so the whole day is visible
+  // without vertical scrolling; rows compress (down to a floor) as the
+  // room count grows, and expand in fullscreen.
+  useEffect(() => {
+    const compute = () => {
+      const fs = document.fullscreenElement === shellRef.current;
+      setIsFullscreen(fs);
+      const chrome = fs ? 150 : 340; // ruler + surrounding UI
+      const available = window.innerHeight - chrome;
+      setRowH(Math.max(34, Math.min(104, Math.floor(available / Math.max(rooms.length, 1)))));
+    };
+    compute();
+    window.addEventListener('resize', compute);
+    document.addEventListener('fullscreenchange', compute);
+    return () => {
+      window.removeEventListener('resize', compute);
+      document.removeEventListener('fullscreenchange', compute);
+    };
+  }, [rooms.length]);
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void shellRef.current?.requestFullscreen?.();
+  };
 
   const updateOverflow = useCallback(() => {
     const el = scrollRef.current;
@@ -122,9 +156,14 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
     scrubMin !== null && toMinutes(s.start_time) <= scrubMin && scrubMin < toMinutes(s.end_time);
 
   return (
-    <div className="board-shell">
+    <div className={`board-shell${isFullscreen ? ' is-fullscreen' : ''}`} ref={shellRef}>
+      <button type="button" className="board-fs-btn mono" onClick={toggleFullscreen}>
+        {isFullscreen ? '✕ Exit fullscreen' : '⛶ Fullscreen'}
+      </button>
       <div
-        className={`board${scrubMin !== null ? ' is-scrubbing' : ''}`}
+        className={`board${scrubMin !== null ? ' is-scrubbing' : ''}${
+          rowH < 62 ? ' board-compact' : rowH < 86 ? ' board-cozy' : ''
+        }`}
         ref={scrollRef}
         onPointerMove={scrubFromPointer}
         onPointerLeave={() => onScrub(null)}
@@ -159,7 +198,8 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
                 style={{ left: LABEL_W + x, width: w }}
               >
                 <span className="mono band-label">
-                  {b.title} · {b.start_time}–{b.end_time}
+                  {b.title}
+                  {b.room ? ` · ${b.room}` : ''} · {b.start_time}–{b.end_time}
                 </span>
               </div>
             );
@@ -168,7 +208,7 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
           {/* room rows */}
           <div className="board-rows">
             {rooms.map((room) => (
-              <div className="board-row" key={room}>
+              <div className="board-row" key={room} style={{ height: rowH }}>
                 <div className="row-label">
                   <span className="mono">{room}</span>
                 </div>

@@ -1,0 +1,776 @@
+/* ---------- Venue: interactive exploded floor stack of Building B1 ---------- */
+
+/* Full-bleed section, scaled like the agenda: background spans the
+   viewport, content sits on the same 1240px grid, scene gets the rest. */
+.venue {
+  padding: var(--space-section) var(--rail);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: background var(--duration-normal) ease;
+}
+
+.venue-header {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+}
+
+.venue-eyebrow {
+  color: var(--red);
+}
+
+.venue-heading {
+  font-size: var(--text-display);
+}
+
+.venue-sub {
+  color: var(--ink-60);
+  max-width: 52ch;
+}
+
+.venue-views {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+/* ---------- floor-by-floor view ---------- */
+
+.venue-floors {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+
+.floor-block {
+  display: grid;
+  grid-template-columns: 88px minmax(240px, 330px) 1fr;
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-3);
+  border: 1px solid var(--ink-12);
+  border-radius: var(--radius);
+  transition:
+    border-color var(--duration-normal) ease,
+    box-shadow var(--duration-normal) ease;
+}
+
+.floor-block.is-active {
+  border-color: var(--red);
+  box-shadow: 0 0 24px rgba(204, 32, 39, 0.25);
+}
+
+.floor-block-head {
+  display: grid;
+  gap: var(--space-1);
+  justify-items: start;
+}
+
+.floor-block-num {
+  font-style: normal;
+  font-size: 2.6rem;
+  line-height: 0.9;
+  color: var(--red);
+}
+
+.floor-block-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.floor-block-note {
+  color: var(--ink-60);
+  font-size: 0.56rem;
+}
+
+.floor-block-plan .floor-svg {
+  width: 100%;
+  height: auto;
+}
+
+.floor-block-events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+  align-content: start;
+}
+
+.floor-event {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 108px 92px 1fr;
+  gap: var(--space-2);
+  align-items: baseline;
+  text-align: left;
+  background: none;
+  border: none;
+  border-left: 2px solid transparent;
+  padding: 5px 8px;
+  font-size: var(--text-sm);
+  transition:
+    background var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
+}
+
+.floor-event:hover,
+.floor-event.is-hot {
+  background: var(--red-08);
+  border-left-color: var(--red);
+}
+
+.floor-event-time {
+  color: var(--ink-60);
+  font-size: 0.6rem;
+}
+
+.floor-event-room {
+  color: var(--red);
+  font-size: 0.6rem;
+}
+
+.floor-event-title {
+  line-height: 1.3;
+  font-size: 0.8rem;
+}
+
+.floor-no-events {
+  color: var(--ink-30);
+  padding: 5px 8px;
+}
+
+.venue-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 460px);
+  gap: var(--space-4);
+  align-items: start;
+  width: 100%;
+  max-width: 1400px;
+  margin-inline: auto;
+}
+
+/* ---------- the 3D scene ---------- */
+
+.venue-scene {
+  position: relative;
+  perspective: 1400px;
+  min-height: 620px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  justify-items: center;
+  gap: var(--space-3);
+  overflow: hidden;
+  border-radius: var(--radius);
+  padding: var(--space-3);
+}
+
+.venue-stack {
+  position: relative;
+  width: 340px;
+  height: 300px;
+  /* headroom for the exploded upper floors + offset for the rotated bbox */
+  margin: 120px 0 70px 90px;
+  transform-style: preserve-3d;
+  transform: rotateX(55deg) rotateZ(-38deg);
+}
+
+.venue-floor {
+  position: absolute;
+  inset: 0;
+  transform: translateZ(calc(var(--i) * 72px));
+  transition:
+    transform var(--duration-normal) var(--ease-out-expo),
+    opacity var(--duration-normal) ease,
+    filter var(--duration-normal) ease;
+  animation: floor-assemble 0.9s var(--ease-out-expo) both;
+  animation-delay: calc(var(--i) * 110ms + 150ms);
+}
+
+@keyframes floor-assemble {
+  from {
+    transform: translateZ(calc(var(--i) * 72px + 280px));
+    opacity: 0;
+  }
+  to {
+    transform: translateZ(calc(var(--i) * 72px));
+    opacity: 1;
+  }
+}
+
+.venue-floor:hover,
+.venue-floor.is-active {
+  transform: translateZ(calc(var(--i) * 72px + 18px));
+  z-index: 3;
+}
+
+.venue-floor.is-muted {
+  opacity: 0.45;
+  filter: saturate(0.5);
+}
+
+.floor-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.floor-slab {
+  transition: fill var(--duration-fast) ease;
+}
+
+.floor-room rect {
+  transition:
+    fill var(--duration-fast) ease,
+    stroke var(--duration-fast) ease;
+}
+
+.floor-room text {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.04em;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.floor-room.is-clickable {
+  cursor: pointer;
+}
+
+.floor-room.is-clickable:focus-visible rect {
+  stroke-width: 2.5;
+}
+
+.room-beacon {
+  pointer-events: none;
+  animation: beacon-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes beacon-pulse {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* screen-space floor legend */
+.venue-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+  align-content: center;
+  min-width: 190px;
+  position: relative;
+  z-index: 2;
+}
+
+.venue-legend li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 6px 10px;
+  border-left: 2px solid transparent;
+  transition:
+    border-color var(--duration-fast) ease,
+    background var(--duration-fast) ease;
+  cursor: default;
+}
+
+.venue-legend li.is-active {
+  border-left-color: var(--red);
+  background: var(--red-08);
+}
+
+.legend-num {
+  font-size: 1.4rem;
+  font-style: normal;
+  color: var(--red);
+  min-width: 30px;
+}
+
+.legend-note {
+  font-size: 0.56rem;
+  color: var(--ink-60);
+}
+
+.legend-upper {
+  color: var(--ink-30);
+  font-size: 0.56rem;
+  padding: 6px 10px 10px;
+  border-bottom: 1px dashed var(--ink-12);
+}
+
+/* screen-space scanline */
+.venue-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -10%;
+  height: 2px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--red-glow), transparent);
+  opacity: 0;
+  animation: scan-sweep 5.5s ease-in-out infinite;
+}
+
+@keyframes scan-sweep {
+  0%,
+  55% {
+    top: -4%;
+    opacity: 0;
+  }
+  60% {
+    opacity: 0.6;
+  }
+  95% {
+    top: 104%;
+    opacity: 0.4;
+  }
+  100% {
+    top: 104%;
+    opacity: 0;
+  }
+}
+
+/* side venues (B2.110, B1.12A) */
+.venue-sides {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: var(--space-3);
+}
+
+.venue-side-chip {
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  background: var(--white);
+  border: 1px solid var(--ink-12);
+  border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3);
+  transition: all var(--duration-fast) ease;
+}
+
+.venue-side-chip:hover {
+  border-color: var(--red);
+  transform: translateY(-2px);
+}
+
+.venue-side-chip.is-selected {
+  border-color: var(--red);
+  box-shadow: var(--shadow-live);
+}
+
+.venue-side-label {
+  color: var(--red);
+}
+
+.venue-side-note {
+  font-size: var(--text-xs);
+  color: var(--ink-60);
+}
+
+/* ---------- info panel ---------- */
+
+.venue-panel {
+  position: sticky;
+  top: var(--space-3);
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  border-top: 4px solid var(--red);
+  padding: var(--space-4);
+  min-height: 320px;
+}
+
+.venue-panel-empty {
+  display: grid;
+  gap: var(--space-2);
+  color: var(--ink-60);
+}
+
+.venue-panel-empty .mono {
+  color: var(--ink-30);
+}
+
+.venue-panel-body {
+  display: grid;
+  gap: var(--space-3);
+  animation: panel-in var(--duration-normal) var(--ease-out-expo);
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.venue-panel-floor {
+  color: var(--red);
+}
+
+.venue-panel-title {
+  font-size: clamp(1.2rem, 1rem + 1.2vw, 1.7rem);
+}
+
+.venue-panel-cap {
+  color: var(--ink-60);
+}
+
+.venue-directions {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+.venue-directions li::marker {
+  color: var(--red);
+  font-family: var(--font-mono);
+}
+
+.venue-panel-label {
+  color: var(--ink-60);
+}
+
+.venue-panel-sessions ul {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.venue-panel-sessions .mono {
+  color: var(--red);
+  margin-right: 6px;
+}
+
+.venue-more {
+  color: var(--ink-30);
+}
+
+.venue-cta {
+  margin-top: var(--space-3);
+}
+
+/* ================= VARIANT A — blueprint (default) ================= */
+
+.venue-blueprint .floor-slab {
+  fill: var(--white);
+  stroke: var(--ink-30);
+  stroke-width: 1;
+}
+
+.venue-blueprint .floor-core {
+  fill: var(--ink-12);
+  stroke: var(--ink-30);
+  stroke-width: 0.6;
+}
+
+.venue-blueprint .floor-room rect {
+  fill: transparent;
+  stroke: var(--ink-30);
+  stroke-width: 0.7;
+}
+
+.venue-blueprint .floor-room.is-clickable rect {
+  fill: var(--red-08);
+  stroke: var(--red);
+  stroke-width: 1.2;
+}
+
+.venue-blueprint .floor-room.is-clickable:hover rect {
+  fill: var(--red-16);
+}
+
+.venue-blueprint .floor-room.is-selected rect {
+  fill: var(--red);
+}
+
+.venue-blueprint .floor-room text {
+  fill: var(--red-deep);
+}
+
+.venue-blueprint .floor-room.is-selected text {
+  fill: var(--white);
+}
+
+.venue-blueprint .room-beacon {
+  fill: var(--red);
+}
+
+
+
+.venue-blueprint .venue-floor {
+  filter: drop-shadow(0 14px 18px rgba(38, 38, 38, 0.12));
+}
+
+/* ================= VARIANT B — hologram ================= */
+
+.venue-hologram {
+  background:
+    radial-gradient(90% 70% at 50% 20%, rgba(204, 32, 39, 0.18), transparent 60%),
+    var(--ink);
+  color: var(--white);
+}
+
+.venue-hologram .venue-heading,
+.venue-hologram .venue-panel-title {
+  color: var(--white);
+}
+
+.venue-hologram .venue-sub {
+  color: var(--white-70);
+}
+
+.venue-hologram .venue-eyebrow {
+  color: var(--red-glow);
+}
+
+.venue-hologram .venue-scene {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.venue-hologram .floor-slab {
+  fill: rgba(255, 255, 255, 0.04);
+  stroke: var(--red-glow);
+  stroke-width: 0.8;
+}
+
+.venue-hologram .floor-core {
+  fill: rgba(255, 74, 82, 0.14);
+  stroke: rgba(255, 74, 82, 0.5);
+  stroke-width: 0.5;
+}
+
+.venue-hologram .floor-room rect {
+  fill: transparent;
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 0.6;
+}
+
+.venue-hologram .floor-room.is-clickable rect {
+  fill: rgba(255, 74, 82, 0.16);
+  stroke: var(--red-glow);
+  stroke-width: 1;
+}
+
+.venue-hologram .floor-room.is-clickable:hover rect {
+  fill: rgba(255, 74, 82, 0.34);
+}
+
+.venue-hologram .floor-room.is-selected rect {
+  fill: var(--red-glow);
+}
+
+.venue-hologram .floor-room text {
+  fill: var(--white);
+}
+
+.venue-hologram .floor-room.is-selected text {
+  fill: var(--ink);
+}
+
+.venue-hologram .room-beacon {
+  fill: var(--red-glow);
+}
+
+.venue-hologram .venue-floor {
+  filter: drop-shadow(0 0 18px rgba(255, 74, 82, 0.25));
+}
+
+
+
+
+.venue-hologram .venue-scan {
+  opacity: 1;
+}
+
+.venue-hologram .venue-panel {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 74, 82, 0.4);
+  border-top-width: 4px;
+  color: var(--white);
+  backdrop-filter: blur(4px);
+}
+
+.venue-hologram .venue-panel-empty,
+.venue-hologram .venue-panel-cap,
+.venue-hologram .venue-directions,
+.venue-hologram .venue-panel-sessions ul {
+  color: var(--white-70);
+}
+
+.venue-hologram .venue-panel-floor,
+.venue-hologram .venue-panel-sessions .mono {
+  color: var(--red-glow);
+}
+
+.venue-hologram .legend-note {
+  color: var(--white-70);
+}
+
+.venue-hologram .legend-upper {
+  color: rgba(255, 255, 255, 0.4);
+  border-bottom-color: rgba(255, 255, 255, 0.18);
+}
+
+.venue-hologram .venue-legend li.is-active {
+  background: rgba(255, 74, 82, 0.14);
+  border-left-color: var(--red-glow);
+}
+
+.venue-hologram .legend-num {
+  color: var(--red-glow);
+}
+
+.venue-hologram .venue-panel-empty .mono {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.venue-hologram .venue-panel-label {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.venue-hologram .venue-views .filter-chip {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: var(--white-70);
+}
+
+.venue-hologram .venue-views .filter-chip:hover {
+  border-color: var(--red-glow);
+  color: var(--red-glow);
+}
+
+.venue-hologram .venue-views .filter-chip.is-active {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--white);
+}
+
+.venue-hologram .floor-block {
+  border-color: rgba(255, 74, 82, 0.3);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.venue-hologram .floor-block.is-active {
+  border-color: var(--red-glow);
+}
+
+.venue-hologram .floor-block-note,
+.venue-hologram .floor-event-time {
+  color: var(--white-70);
+}
+
+.venue-hologram .floor-event-room {
+  color: var(--red-glow);
+}
+
+.venue-hologram .floor-event:hover,
+.venue-hologram .floor-event.is-hot {
+  background: rgba(255, 74, 82, 0.12);
+  border-left-color: var(--red-glow);
+}
+
+.venue-hologram .floor-no-events {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.venue-hologram .venue-side-chip {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--white);
+}
+
+.venue-hologram .venue-side-note {
+  color: var(--white-70);
+}
+
+/* ================= VARIANT C — editorial solid ================= */
+
+.venue-solid .floor-slab {
+  fill: var(--blush);
+  stroke: none;
+}
+
+.venue-solid .floor-core {
+  fill: var(--ink);
+}
+
+.venue-solid .floor-room rect {
+  fill: var(--white);
+  stroke: none;
+}
+
+.venue-solid .floor-room.is-clickable rect {
+  fill: var(--red);
+}
+
+.venue-solid .floor-room.is-clickable:hover rect {
+  fill: var(--red-deep);
+}
+
+.venue-solid .floor-room.is-selected rect {
+  fill: var(--ink);
+}
+
+.venue-solid .floor-room text {
+  fill: var(--white);
+  font-weight: 500;
+}
+
+.venue-solid .room-beacon {
+  fill: var(--ink);
+}
+
+.venue-solid .venue-floor {
+  filter: drop-shadow(0 20px 24px rgba(204, 32, 39, 0.16));
+}
+
+
+
+/* ---------- responsive & motion ---------- */
+
+@media (max-width: 960px) {
+  .venue-body {
+    grid-template-columns: 1fr;
+  }
+  .venue-panel {
+    position: static;
+  }
+  .venue-stack {
+    transform: rotateX(57deg) rotateZ(-38deg) scale(0.78);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .venue-floor,
+  .venue-scan,
+  .room-beacon,
+  .venue-panel-body {
+    animation: none !important;
+  }
+}

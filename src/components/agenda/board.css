@@ -292,6 +292,80 @@
   border-left: 3px solid var(--red);
 }
 
+.block-showcase {
+  background: var(--blush);
+  border: 1px dashed var(--red);
+}
+
+.block-showcase .block-title {
+  color: var(--red-deep);
+}
+
+/* cozy mode: medium rows — one-line titles so nothing half-clips */
+.board-cozy .block-title {
+  -webkit-line-clamp: 1;
+}
+
+/* compact mode: rows squeezed to fit every room on screen —
+   single-line layout so nothing can clip vertically */
+.board-compact .block {
+  flex-direction: row;
+  align-items: center;
+  padding: 2px 7px;
+  gap: 6px;
+}
+
+.board-compact .block-time {
+  display: none;
+}
+
+.board-compact .block-title {
+  -webkit-line-clamp: 1;
+  font-size: 0.64rem;
+  min-width: 0;
+}
+
+.board-compact .block-code {
+  font-size: 0.54rem;
+  padding: 0 5px;
+}
+
+.board-compact .band-label {
+  font-size: 0.54rem;
+}
+
+/* fullscreen board */
+.board-fs-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  background: var(--white);
+  border: 1px solid var(--ink-30);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  color: var(--ink-60);
+  transition: all var(--duration-fast) ease;
+}
+
+.board-fs-btn:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.board-shell.is-fullscreen {
+  background: var(--blush);
+  padding: 3rem 1.5rem 1rem;
+  width: 100%;
+  margin: 0;
+  overflow: auto;
+}
+
+.board-shell.is-fullscreen .board-fs-btn {
+  top: 8px;
+  right: 12px;
+}
+
 .block-live,
 .block-next {
   font-size: 0.58rem;

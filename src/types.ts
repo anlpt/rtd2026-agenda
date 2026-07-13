@@ -1,4 +1,11 @@
-export type SessionType = 'keynote' | 'special' | 'parallel' | 'break' | 'ceremony';
+export type SessionType = 'keynote' | 'special' | 'parallel' | 'break' | 'ceremony' | 'showcase';
+
+export interface Paper {
+  code: string; // 'ID 7'
+  time: string; // '13:00–13:15'
+  title: string;
+  authors: string;
+}
 
 export interface Day {
   id: string;
@@ -22,6 +29,7 @@ export interface Session {
   end_time: string; // 'HH:MM'
   description: string | null;
   paper_count: number | null;
+  papers: Paper[] | null;
   sort: number;
 }
 
@@ -39,4 +47,5 @@ export const SESSION_TYPE_LABEL: Record<SessionType, string> = {
   parallel: 'Parallel Session',
   break: 'Break',
   ceremony: 'Ceremony',
+  showcase: 'Showcase & Experience',
 };

@@ -22,8 +22,22 @@ const EMPTY_SESSION = (dayId: string): Session => ({
   end_time: '10:00',
   description: '',
   paper_count: null,
+  papers: null,
   sort: 999,
 });
+
+// One paper per line: "ID 7 | 13:00–13:15 | Title | Authors"
+const papersToText = (papers: Session['papers']): string =>
+  (papers ?? []).map((pp) => `${pp.code} | ${pp.time} | ${pp.title} | ${pp.authors}`).join('\n');
+
+const textToPapers = (text: string): Session['papers'] => {
+  const rows = text
+    .split('\n')
+    .map((line) => line.split('|').map((cell) => cell.trim()))
+    .filter((cells) => cells.length >= 3 && cells[0] !== '');
+  if (rows.length === 0) return null;
+  return rows.map(([code, time, title, authors]) => ({ code, time, title, authors: authors ?? '' }));
+};
 
 function nullify(s: Session): Session {
   const trim = (v: string | null) => (v && v.trim() !== '' ? v.trim() : null);
@@ -94,6 +108,7 @@ function SessionForm({
   onDelete?: (id: string) => void;
 }) {
   const [draft, setDraft] = useState<Session>({ ...session });
+  const [papersText, setPapersText] = useState(() => papersToText(session.papers));
   const set = <K extends keyof Session>(key: K, value: Session[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
 
@@ -159,17 +174,19 @@ function SessionForm({
         <span className="mono">Panelists (separate with ;)</span>
         <input value={draft.panelists ?? ''} onChange={(e) => set('panelists', e.target.value)} />
       </label>
-      <div className="form-grid">
-        <label>
-          <span className="mono">Number of papers</span>
-          <input
-            type="number"
-            min={0}
-            value={draft.paper_count ?? ''}
-            onChange={(e) => set('paper_count', e.target.value === '' ? null : Number(e.target.value))}
-          />
-        </label>
-      </div>
+      <label>
+        <span className="mono">Papers — one per line: ID | time | title | authors</span>
+        <textarea
+          rows={5}
+          placeholder="ID 7 | 13:00–13:15 | Paper title | Author One, Author Two"
+          value={papersText}
+          onChange={(e) => {
+            setPapersText(e.target.value);
+            const papers = textToPapers(e.target.value);
+            setDraft((d) => ({ ...d, papers, paper_count: papers ? papers.length : null }));
+          }}
+        />
+      </label>
       <label>
         <span className="mono">Description</span>
         <textarea rows={3} value={draft.description ?? ''} onChange={(e) => set('description', e.target.value)} />

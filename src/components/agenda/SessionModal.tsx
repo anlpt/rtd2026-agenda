@@ -1,13 +1,16 @@
 import { useEffect, useRef } from 'react';
 import type { Session } from '../../types';
 import { SESSION_TYPE_LABEL } from '../../types';
+import { findVenue } from '../../data/venue';
 
 interface Props {
   session: Session;
   onClose: () => void;
+  /** Jump to the 3D venue map with this room selected. */
+  onLocate?: (room: string) => void;
 }
 
-export function SessionModal({ session, onClose }: Props) {
+export function SessionModal({ session, onClose, onLocate }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -26,6 +29,8 @@ export function SessionModal({ session, onClose }: Props) {
     ?.split(';')
     .map((p) => p.trim())
     .filter(Boolean);
+
+  const venue = findVenue(session.room);
 
   return (
     <dialog
@@ -80,6 +85,44 @@ export function SessionModal({ session, onClose }: Props) {
           <section className="modal-section">
             <h4 className="mono modal-section-label">About</h4>
             <p>{session.description}</p>
+          </section>
+        )}
+        {venue && (
+          <section className="modal-section modal-wayfinding">
+            <h4 className="mono modal-section-label">Getting there — {venue.where}</h4>
+            <ol className="modal-directions">
+              {venue.directions.map((step, i) => (
+                <li key={i}>{step}</li>
+              ))}
+            </ol>
+            {onLocate && session.room && (
+              <button
+                type="button"
+                className="modal-locate mono"
+                onClick={() => {
+                  onClose();
+                  onLocate(session.room!);
+                }}
+              >
+                View in the 3D building map ↓
+              </button>
+            )}
+          </section>
+        )}
+        {session.papers && session.papers.length > 0 && (
+          <section className="modal-section">
+            <h4 className="mono modal-section-label">Presentations</h4>
+            <ol className="modal-papers">
+              {session.papers.map((paper) => (
+                <li key={paper.code} className="modal-paper">
+                  <span className="mono modal-paper-meta">
+                    {paper.time} · {paper.code}
+                  </span>
+                  <span className="modal-paper-title">{paper.title}</span>
+                  <span className="modal-paper-authors">{paper.authors}</span>
+                </li>
+              ))}
+            </ol>
           </section>
         )}
       </article>
