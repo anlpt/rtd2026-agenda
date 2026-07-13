@@ -100,10 +100,10 @@ export function Agenda({ days, sessions, clock, now, roomFocus, onLocateRoom }: 
     <section className="agenda" id="agenda" aria-label="Conference agenda">
       <div className="agenda-header">
         <p className="mono agenda-eyebrow" data-reveal>
-          Programme · UEH Campus B · GMT+7
+          Programme · Ho Chi Minh City · Vinh Long · Khanh Hoa · GMT+7
         </p>
         <h2 className="display agenda-heading" data-reveal>
-          Two days,
+          Six days,
           <br />
           minute by minute
         </h2>
@@ -154,10 +154,10 @@ export function Agenda({ days, sessions, clock, now, roomFocus, onLocateRoom }: 
               <span className="mono chrono-clock-label">
                 {isToday && live.liveIds.size > 0 ? (
                   <>
-                    <span className="live-dot" aria-hidden="true" /> Live · Ho Chi Minh City
+                    <span className="live-dot" aria-hidden="true" /> Live · Vietnam
                   </>
                 ) : (
-                  'Ho Chi Minh City'
+                  'Vietnam'
                 )}
               </span>
               <span className="chrono-clock-time">{CLOCK_FMT.format(now)}</span>

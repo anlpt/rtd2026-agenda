@@ -10,8 +10,15 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 // explicit file paths, unlike Vite's extensionless resolution).
 const { day1Sessions } = await import(join(root, 'src/data/seed-day1.ts'));
 const { day2Sessions } = await import(join(root, 'src/data/seed-day2.ts'));
+const { day3Sessions } = await import(join(root, 'src/data/seed-day3.ts'));
+const { day4Sessions } = await import(join(root, 'src/data/seed-day4.ts'));
+const { day5Sessions } = await import(join(root, 'src/data/seed-day5.ts'));
+const { day6Sessions } = await import(join(root, 'src/data/seed-day6.ts'));
 const { seedMeta } = await import(join(root, 'src/data/seed-meta.ts'));
-const seedData = { ...seedMeta, sessions: [...day1Sessions, ...day2Sessions] };
+const seedData = {
+  ...seedMeta,
+  sessions: [...day1Sessions, ...day2Sessions, ...day3Sessions, ...day4Sessions, ...day5Sessions, ...day6Sessions],
+};
 
 const q = (v) => (v === null || v === undefined ? 'null' : `'${String(v).replaceAll("'", "''")}'`);
 

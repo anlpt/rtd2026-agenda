@@ -50,7 +50,7 @@ export function PublicPage() {
           </h2>
           <div className="footer-meta">
             <span>The 3rd International Conference on Resilience by Technology and Design</span>
-            <span>15–20 July 2026 · UEH Campus B · Ho Chi Minh City, Vietnam</span>
+            <span>15–20 July 2026 · Ho Chi Minh City · Vinh Long · Khanh Hoa</span>
             {settings.post_conference_note && <p className="footer-note">{settings.post_conference_note}</p>}
             {settings.support_note && <p className="footer-note">{settings.support_note}</p>}
             <span>

@@ -33,14 +33,17 @@
 }
 
 .chrono-days {
-  display: flex;
-  gap: clamp(1.5rem, 4vw, 3.5rem);
+  flex: 1 1 720px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(138px, 1fr));
+  gap: var(--space-3);
 }
 
 .chrono-day {
   background: none;
   border: none;
-  padding: 0;
+  border-left: 2px solid var(--ink-12);
+  padding: 0 0 0 var(--space-2);
   display: flex;
   align-items: flex-end;
   gap: var(--space-2);
@@ -48,7 +51,7 @@
 }
 
 .chrono-num {
-  font-size: clamp(4.5rem, 3rem + 9vw, 10rem);
+  font-size: 4.75rem;
   line-height: 0.82;
   color: transparent;
   -webkit-text-stroke: 2px var(--ink-30);
@@ -75,6 +78,10 @@
 
 .chrono-day.is-active .chrono-meta {
   color: var(--ink);
+}
+
+.chrono-day.is-active {
+  border-left-color: var(--red);
 }
 
 .chrono-today {
@@ -422,6 +429,19 @@
 @media (max-width: 720px) {
   .chronograph {
     align-items: flex-start;
+  }
+  .chrono-days {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .chrono-day {
+    gap: 6px;
+  }
+  .chrono-num {
+    font-size: 3.1rem;
+    -webkit-text-stroke-width: 1.5px;
+  }
+  .chrono-meta {
+    font-size: 0.56rem;
   }
   .chrono-clock {
     justify-items: start;

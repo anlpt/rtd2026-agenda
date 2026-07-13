@@ -97,7 +97,7 @@ export function Hero({ tagline, now }: { tagline: string; now: Date }) {
           </span>
         </h1>
         <p className="mono hero-meta" data-reveal>
-          15–20 July 2026 · UEH Campus B · Ho Chi Minh City · Vietnam
+          15–20 July 2026 · Ho Chi Minh City · Vinh Long · Khanh Hoa
         </p>
         <div data-reveal>
           <Countdown now={now} />
