@@ -13,7 +13,7 @@ export function SessionModal({ session, onClose }: Props) {
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
-    dialog.showModal();
+    if (!dialog.open) dialog.showModal();
     const onCancel = (e: Event) => {
       e.preventDefault();
       onClose();

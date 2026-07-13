@@ -20,7 +20,9 @@ const dtf = new Intl.DateTimeFormat('en-CA', {
 
 /** `?now=2026-07-15T09:30` lets organisers preview live behaviour. */
 export function getSimulatedNow(): Date | null {
-  const raw = new URLSearchParams(window.location.search).get('now');
+  // URLSearchParams decodes '+' as a space; the ISO format never contains
+  // spaces, so restoring them keeps offsets like +07:00 working.
+  const raw = new URLSearchParams(window.location.search).get('now')?.replaceAll(' ', '+');
   if (!raw) return null;
   // Interpret the override as conference-local time (+07:00).
   const parsed = new Date(raw.includes('+') || raw.endsWith('Z') ? raw : `${raw}:00+07:00`);

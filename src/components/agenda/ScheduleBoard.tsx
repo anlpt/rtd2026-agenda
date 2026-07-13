@@ -9,8 +9,11 @@ const MIN_PPM = 2.3; // readability floor — below this, blocks get too narrow
 const MAX_PPM = 4.2;
 const HALF_HOUR = 30;
 
-export function roomKey(room: string): string {
-  return room.replace(/\s*\(\d+\)\s*$/, '').trim();
+const ROOM_TBA = 'Room TBA';
+
+export function roomKey(room: string | null): string {
+  const key = (room ?? '').replace(/\s*\(\d+\)\s*$/, '').trim();
+  return key === '' ? ROOM_TBA : key;
 }
 
 /** Day span derived from the content, rounded to half hours. */
@@ -47,15 +50,12 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
   const gridW = duration * ppm;
 
   const bands = useMemo(() => sessions.filter((s) => s.type === 'break'), [sessions]);
-  const blocks = useMemo(() => sessions.filter((s) => s.type !== 'break' && s.room), [sessions]);
+  const blocks = useMemo(() => sessions.filter((s) => s.type !== 'break'), [sessions]);
 
   const rooms = useMemo(() => {
-    const keys = [...new Set(blocks.map((b) => roomKey(b.room!)))];
-    return keys.sort((a, b) => {
-      const aHall = a.toLowerCase().startsWith('hall') ? 0 : 1;
-      const bHall = b.toLowerCase().startsWith('hall') ? 0 : 1;
-      return aHall - bHall || a.localeCompare(b, undefined, { numeric: true });
-    });
+    const keys = [...new Set(blocks.map((b) => roomKey(b.room)))];
+    const rank = (k: string) => (k.toLowerCase().startsWith('hall') ? 0 : k === ROOM_TBA ? 2 : 1);
+    return keys.sort((a, b) => rank(a) - rank(b) || a.localeCompare(b, undefined, { numeric: true }));
   }, [blocks]);
 
   const hours = useMemo(() => {
@@ -174,7 +174,7 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
                 </div>
                 <div className="row-track" style={{ width: gridW }}>
                   {blocks
-                    .filter((s) => roomKey(s.room!) === room)
+                    .filter((s) => roomKey(s.room) === room)
                     .map((s) => {
                       const x = minToX(toMinutes(s.start_time));
                       const w = minToX(toMinutes(s.end_time)) - x;
@@ -197,7 +197,7 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
                           className={classes}
                           style={{ left: x, width: Math.max(w - 4, 40) }}
                           onClick={() => onOpen(s)}
-                          aria-label={`${s.code ?? ''} ${s.title}, ${s.start_time} to ${s.end_time}, ${s.room}`}
+                          aria-label={`${s.code ?? ''} ${s.title}, ${s.start_time} to ${s.end_time}, ${s.room ?? 'room to be announced'}`}
                         >
                           <span className="block-head">
                             {s.code && <span className="mono block-code">{s.code}</span>}
