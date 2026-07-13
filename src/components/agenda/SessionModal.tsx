@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import type { Session } from '../../types';
 import { SESSION_TYPE_LABEL } from '../../types';
-import { findVenue } from '../../data/venue';
+import { findVenue, findRoomLocation } from '../../data/venue';
+import { FloorPlan } from '../venue/FloorPlan';
 
 interface Props {
   session: Session;
@@ -31,6 +32,7 @@ export function SessionModal({ session, onClose, onLocate }: Props) {
     .filter(Boolean);
 
   const venue = findVenue(session.room);
+  const location = findRoomLocation(session.room);
 
   return (
     <dialog
@@ -90,11 +92,21 @@ export function SessionModal({ session, onClose, onLocate }: Props) {
         {venue && (
           <section className="modal-section modal-wayfinding">
             <h4 className="mono modal-section-label">Getting there — {venue.where}</h4>
-            <ol className="modal-directions">
-              {venue.directions.map((step, i) => (
-                <li key={i}>{step}</li>
-              ))}
-            </ol>
+            <div className="modal-wayfinding-grid">
+              {location && (
+                <div className="venue-blueprint modal-minimap" aria-hidden="true">
+                  <FloorPlan floor={location.floor} selectedRoomId={location.room.id} onSelect={() => {}} />
+                  <span className="mono modal-minimap-tag">
+                    {location.floor.short} · {location.room.label}
+                  </span>
+                </div>
+              )}
+              <ol className="modal-directions">
+                {venue.directions.map((step, i) => (
+                  <li key={i}>{step}</li>
+                ))}
+              </ol>
+            </div>
             {onLocate && session.room && (
               <button
                 type="button"

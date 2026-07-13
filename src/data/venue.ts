@@ -179,6 +179,25 @@ export interface VenueLookup {
   directions: string[];
 }
 
+export interface RoomLocation {
+  floor: VenueFloor;
+  room: VenueRoom;
+}
+
+/** Locate the floor + room for an agenda room string (for the modal mini-map). */
+export function findRoomLocation(room: string | null): RoomLocation | null {
+  if (!room) return null;
+  const key = normalize(room);
+  let fallback: RoomLocation | null = null;
+  for (const floor of VENUE_FLOORS) {
+    const match = floor.rooms.find((r) => normalize(r.label) === key);
+    if (!match) continue;
+    if (match.interactive) return { floor, room: match };
+    fallback = fallback ?? { floor, room: match };
+  }
+  return fallback;
+}
+
 const normalize = (room: string): string => room.replace(/\s*\(\d+\)\s*$/, '').trim().toLowerCase();
 
 /** Find wayfinding info for an agenda room string (capacity suffix tolerated). */

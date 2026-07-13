@@ -4,13 +4,12 @@ interface Props {
   floor: VenueFloor;
   selectedRoomId?: string | null;
   onSelect: (room: VenueRoom, floorLabel: string) => void;
-  /** Draw the pulsing route beam for the selected room. */
-  showBeacon?: boolean;
 }
 
+const HIT_PAD = 3; // invisible padding around each room for easier clicking
+
 /** One floor of Building B1 as an interactive SVG plan (used flat and in 3D). */
-export function FloorPlan({ floor, selectedRoomId, onSelect, showBeacon = true }: Props) {
-  const selected = selectedRoomId ? floor.rooms.find((r) => r.id === selectedRoomId) : undefined;
+export function FloorPlan({ floor, selectedRoomId, onSelect }: Props) {
   return (
     <svg className="floor-svg" viewBox="0 0 200 170" aria-label={`${floor.label} — ${floor.note}`}>
       <path className="floor-slab" d="M8 8 H192 V162 H8 Z" />
@@ -35,7 +34,17 @@ export function FloorPlan({ floor, selectedRoomId, onSelect, showBeacon = true }
           }}
           aria-label={r.interactive ? `${r.label} — ${r.name}` : undefined}
         >
-          <rect x={r.rect.x} y={r.rect.y} width={r.rect.w} height={r.rect.h} rx="1.5" />
+          {/* larger transparent hit target — makes the 3D view easy to click */}
+          {r.interactive && (
+            <rect
+              className="room-hit"
+              x={r.rect.x - HIT_PAD}
+              y={r.rect.y - HIT_PAD}
+              width={r.rect.w + HIT_PAD * 2}
+              height={r.rect.h + HIT_PAD * 2}
+            />
+          )}
+          <rect className="room-fill" x={r.rect.x} y={r.rect.y} width={r.rect.w} height={r.rect.h} rx="1.5" />
           {r.interactive && (
             <text x={r.rect.x + r.rect.w / 2} y={r.rect.y + r.rect.h / 2 + 2.5}>
               {r.label.replace('Hall ', '').replace(' & B1.306', '')}
@@ -43,15 +52,6 @@ export function FloorPlan({ floor, selectedRoomId, onSelect, showBeacon = true }
           )}
         </g>
       ))}
-      {showBeacon && selected && (
-        <rect
-          className="room-beacon"
-          x={selected.rect.x + selected.rect.w / 2 - 2}
-          y={0}
-          width="4"
-          height={selected.rect.y + selected.rect.h / 2}
-        />
-      )}
     </svg>
   );
 }

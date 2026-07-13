@@ -179,13 +179,28 @@
   /* headroom for the exploded upper floors + offset for the rotated bbox */
   margin: 120px 0 70px 90px;
   transform-style: preserve-3d;
-  transform: rotateX(55deg) rotateZ(-38deg);
+  /* --tilt / --spin driven by JS for idle drift + pointer parallax */
+  transform: rotateX(calc(55deg + var(--tilt, 0deg))) rotateZ(calc(-38deg + var(--spin, 0deg)));
+  transition: transform 0.12s linear;
+}
+
+/* view-switch mount transition (3D <-> floor by floor) */
+.venue-scene,
+.venue-floors {
+  animation: view-in 0.55s var(--ease-out-expo) both;
+}
+
+@keyframes view-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.99);
+  }
 }
 
 .venue-floor {
   position: absolute;
   inset: 0;
-  transform: translateZ(calc(var(--i) * 72px));
+  transform: translateZ(calc(var(--i) * 78px));
   transition:
     transform var(--duration-normal) var(--ease-out-expo),
     opacity var(--duration-normal) ease,
@@ -196,24 +211,31 @@
 
 @keyframes floor-assemble {
   from {
-    transform: translateZ(calc(var(--i) * 72px + 280px));
+    transform: translateZ(calc(var(--i) * 78px + 300px));
     opacity: 0;
   }
   to {
-    transform: translateZ(calc(var(--i) * 72px));
+    transform: translateZ(calc(var(--i) * 78px));
     opacity: 1;
   }
 }
 
+/* Hovering a floor pops it clearly forward so its rooms are unobstructed. */
 .venue-floor:hover,
 .venue-floor.is-active {
-  transform: translateZ(calc(var(--i) * 72px + 18px));
-  z-index: 3;
+  transform: translateZ(calc(var(--i) * 78px + 46px));
+  z-index: 5;
+}
+
+/* Lock pointer to the floor actually under the cursor — back floors can't
+   steal the click through their projected overlap. */
+.venue-stack:hover .venue-floor:not(:hover) {
+  pointer-events: none;
 }
 
 .venue-floor.is-muted {
-  opacity: 0.45;
-  filter: saturate(0.5);
+  opacity: 0.4;
+  filter: saturate(0.45);
 }
 
 .floor-svg {
@@ -226,10 +248,17 @@
   transition: fill var(--duration-fast) ease;
 }
 
-.floor-room rect {
+.room-hit {
+  fill: transparent;
+  stroke: none;
+}
+
+.floor-room .room-fill {
   transition:
     fill var(--duration-fast) ease,
     stroke var(--duration-fast) ease;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .floor-room text {
@@ -244,22 +273,24 @@
   cursor: pointer;
 }
 
-.floor-room.is-clickable:focus-visible rect {
+.floor-room.is-clickable:focus-visible .room-fill {
   stroke-width: 2.5;
 }
 
-.room-beacon {
-  pointer-events: none;
-  animation: beacon-pulse 1.6s ease-in-out infinite;
+/* selected room blooms in place (replaces the old beacon-from-above) */
+.floor-room.is-selected .room-fill {
+  animation: room-bloom 1.8s ease-in-out infinite;
 }
 
-@keyframes beacon-pulse {
+@keyframes room-bloom {
   0%,
   100% {
-    opacity: 0.85;
+    transform: scale(1);
+    filter: brightness(1);
   }
   50% {
-    opacity: 0.25;
+    transform: scale(1.06);
+    filter: brightness(1.35);
   }
 }
 
@@ -487,23 +518,23 @@
   stroke-width: 0.6;
 }
 
-.venue-blueprint .floor-room rect {
+.venue-blueprint .floor-room .room-fill {
   fill: transparent;
   stroke: var(--ink-30);
   stroke-width: 0.7;
 }
 
-.venue-blueprint .floor-room.is-clickable rect {
+.venue-blueprint .floor-room.is-clickable .room-fill {
   fill: var(--red-08);
   stroke: var(--red);
   stroke-width: 1.2;
 }
 
-.venue-blueprint .floor-room.is-clickable:hover rect {
+.venue-blueprint .floor-room.is-clickable:hover .room-fill {
   fill: var(--red-16);
 }
 
-.venue-blueprint .floor-room.is-selected rect {
+.venue-blueprint .floor-room.is-selected .room-fill {
   fill: var(--red);
 }
 
@@ -515,9 +546,6 @@
   fill: var(--white);
 }
 
-.venue-blueprint .room-beacon {
-  fill: var(--red);
-}
 
 
 
@@ -566,23 +594,23 @@
   stroke-width: 0.5;
 }
 
-.venue-hologram .floor-room rect {
+.venue-hologram .floor-room .room-fill {
   fill: transparent;
   stroke: rgba(255, 255, 255, 0.22);
   stroke-width: 0.6;
 }
 
-.venue-hologram .floor-room.is-clickable rect {
+.venue-hologram .floor-room.is-clickable .room-fill {
   fill: rgba(255, 74, 82, 0.16);
   stroke: var(--red-glow);
   stroke-width: 1;
 }
 
-.venue-hologram .floor-room.is-clickable:hover rect {
+.venue-hologram .floor-room.is-clickable:hover .room-fill {
   fill: rgba(255, 74, 82, 0.34);
 }
 
-.venue-hologram .floor-room.is-selected rect {
+.venue-hologram .floor-room.is-selected .room-fill {
   fill: var(--red-glow);
 }
 
@@ -594,9 +622,6 @@
   fill: var(--ink);
 }
 
-.venue-hologram .room-beacon {
-  fill: var(--red-glow);
-}
 
 .venue-hologram .venue-floor {
   filter: drop-shadow(0 0 18px rgba(255, 74, 82, 0.25));
@@ -720,20 +745,20 @@
   fill: var(--ink);
 }
 
-.venue-solid .floor-room rect {
+.venue-solid .floor-room .room-fill {
   fill: var(--white);
   stroke: none;
 }
 
-.venue-solid .floor-room.is-clickable rect {
+.venue-solid .floor-room.is-clickable .room-fill {
   fill: var(--red);
 }
 
-.venue-solid .floor-room.is-clickable:hover rect {
+.venue-solid .floor-room.is-clickable:hover .room-fill {
   fill: var(--red-deep);
 }
 
-.venue-solid .floor-room.is-selected rect {
+.venue-solid .floor-room.is-selected .room-fill {
   fill: var(--ink);
 }
 
@@ -742,9 +767,6 @@
   font-weight: 500;
 }
 
-.venue-solid .room-beacon {
-  fill: var(--ink);
-}
 
 .venue-solid .venue-floor {
   filter: drop-shadow(0 20px 24px rgba(204, 32, 39, 0.16));
@@ -769,7 +791,6 @@
 @media (prefers-reduced-motion: reduce) {
   .venue-floor,
   .venue-scan,
-  .room-beacon,
   .venue-panel-body {
     animation: none !important;
   }

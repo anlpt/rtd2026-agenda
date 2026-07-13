@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Session } from '../../types';
 import { SIDE_VENUES, UPPER_FLOORS_NOTE, VENUE_FLOORS, type SideVenue, type VenueRoom } from '../../data/venue';
 import { roomKey } from '../agenda/ScheduleBoard';
@@ -32,8 +32,39 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
   const [view, setView] = useState<VenueView>('stack');
   const [selected, setSelected] = useState<Selection | null>(null);
   const [hoverFloor, setHoverFloor] = useState<string | null>(null);
+  const stackRef = useRef<HTMLDivElement>(null);
+  const pointer = useRef({ x: 0, y: 0 });
 
   useReveal([view]);
+
+  // Living hologram: gentle idle drift + pointer parallax on the 3D stack.
+  useEffect(() => {
+    if (view !== 'stack') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let raf = 0;
+    const start = performance.now();
+    const tick = (t: number) => {
+      const el = stackRef.current;
+      if (el) {
+        const e = (t - start) / 1000;
+        const tilt = Math.sin(e * 0.5) * 2.2 + pointer.current.y * 2;
+        const spin = Math.cos(e * 0.35) * 2.6 + pointer.current.x * 3;
+        el.style.setProperty('--tilt', `${tilt.toFixed(2)}deg`);
+        el.style.setProperty('--spin', `${spin.toFixed(2)}deg`);
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [view]);
+
+  const onScenePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    pointer.current = {
+      x: (e.clientX - r.left) / r.width - 0.5,
+      y: (e.clientY - r.top) / r.height - 0.5,
+    };
+  };
 
   // External focus (from a session's "view in the 3D map" button):
   // select the room and, in floor view, bring its floor on screen.
@@ -119,8 +150,8 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
 
       <div className="venue-body">
         {view === 'stack' ? (
-          <div className="venue-scene" data-reveal>
-            <div className="venue-stack" role="list">
+          <div className="venue-scene" data-reveal onPointerMove={onScenePointerMove}>
+            <div className="venue-stack" role="list" ref={stackRef}>
               {[...VENUE_FLOORS].reverse().map((floor) => {
                 const isActive =
                   hoverFloor === floor.id || (selected?.kind === 'room' && selected.floorLabel === floor.label);
