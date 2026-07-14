@@ -54,6 +54,7 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
   const [rowH, setRowH] = useState(76);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [overflow, setOverflow] = useState({ left: false, right: false });
+  const [hoveredSession, setHoveredSession] = useState<Session | null>(null);
 
   const { start, end } = useMemo(() => boardRange(sessions), [sessions]);
   const duration = end - start;
@@ -106,7 +107,7 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
     const compute = () => {
       const fs = document.fullscreenElement === shellRef.current;
       setIsFullscreen(fs);
-      const chrome = fs ? 150 : 340; // ruler + surrounding UI
+      const chrome = fs ? 230 : 400; // ruler + surrounding UI + event detail strip
       const available = window.innerHeight - chrome;
       setRowH(Math.max(34, Math.min(104, Math.floor(available / Math.max(rooms.length, 1)))));
     };
@@ -163,11 +164,29 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
   const isHot = (s: Session) =>
     scrubMin !== null && toMinutes(s.start_time) <= scrubMin && scrubMin < toMinutes(s.end_time);
 
+  const spotlightSession = useMemo(() => {
+    if (scrubMin !== null) {
+      const hot = blocks.find((s) => toMinutes(s.start_time) <= scrubMin && scrubMin < toMinutes(s.end_time));
+      if (hot) return hot;
+    }
+    if (hoveredSession && blocks.some((s) => s.id === hoveredSession.id)) return hoveredSession;
+    return blocks.find((s) => live.liveIds.has(s.id)) ?? blocks.find((s) => live.nextIds.has(s.id)) ?? blocks[0] ?? null;
+  }, [blocks, hoveredSession, live.liveIds, live.nextIds, scrubMin]);
+
   return (
     <div className={`board-shell${isFullscreen ? ' is-fullscreen' : ''}`} ref={shellRef}>
       <button type="button" className="board-fs-btn mono" onClick={toggleFullscreen}>
         {isFullscreen ? '✕ Exit fullscreen' : '⛶ Fullscreen'}
       </button>
+      {spotlightSession && (
+        <div className="board-spotlight">
+          <div>
+            <span className="mono spotlight-kicker">{day.label} · {spotlightSession.start_time}–{spotlightSession.end_time}</span>
+            <strong>{spotlightSession.code ? `${spotlightSession.code} · ` : ''}{spotlightSession.title}</strong>
+          </div>
+          <p>{blockDetail(spotlightSession) ?? spotlightSession.room ?? day.title}</p>
+        </div>
+      )}
       <div
         className={`board${scrubMin !== null ? ' is-scrubbing' : ''}${
           rowH < 50 ? ' board-compact' : rowH < 74 ? ' board-cozy' : ''
@@ -228,7 +247,6 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
                       const w = minToX(toMinutes(s.end_time)) - x;
                       const liveNow = live.liveIds.has(s.id);
                       const next = live.nextIds.has(s.id);
-                      const detail = blockDetail(s);
                       const classes = [
                         'block',
                         `block-${s.type}`,
@@ -246,6 +264,8 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
                           className={classes}
                           style={{ left: x, width: Math.max(w - 4, 40) }}
                           onClick={() => onOpen(s)}
+                          onPointerEnter={() => setHoveredSession(s)}
+                          onFocus={() => setHoveredSession(s)}
                           aria-label={`${s.code ?? ''} ${s.title}, ${s.start_time} to ${s.end_time}, ${s.room ?? 'room to be announced'}`}
                         >
                           <span className="block-head">
@@ -258,7 +278,6 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
                             {!liveNow && next && <span className="mono block-next">NEXT</span>}
                           </span>
                           <span className="block-title">{s.title}</span>
-                          {detail && <span className="block-detail">{detail}</span>}
                           <span className="mono block-time">
                             {s.start_time}–{s.end_time}
                           </span>
