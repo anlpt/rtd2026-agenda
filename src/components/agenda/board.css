@@ -9,12 +9,13 @@
 }
 
 .board-spotlight {
-  min-height: 74px;
+  min-height: 58px;
   margin-bottom: var(--space-2);
   display: grid;
+  grid-template-columns: minmax(260px, 0.82fr) minmax(320px, 1.18fr);
   gap: 0.32rem;
-  align-items: start;
-  padding: 0.72rem 0.9rem;
+  align-items: center;
+  padding: 0.58rem 0.75rem;
   background: rgba(255, 255, 255, 0.68);
   border: 1px solid var(--ink-12);
   border-left: 3px solid var(--red);
@@ -40,7 +41,7 @@
   font-size: clamp(0.74rem, 0.69rem + 0.18vw, 0.9rem);
   line-height: 1.35;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -403,10 +404,34 @@
 
 .board-shell.is-fullscreen {
   background: var(--blush);
-  padding: 3rem 1.5rem 1rem;
+  padding: 3.25rem 1.5rem 1rem;
   width: 100%;
   margin: 0;
   overflow: auto;
+}
+
+.board-shell.is-fullscreen .board-spotlight {
+  position: absolute;
+  top: 8px;
+  left: 1.5rem;
+  right: 13.5rem;
+  z-index: 10;
+  min-height: 32px;
+  grid-template-columns: minmax(220px, 0.85fr) minmax(240px, 1.15fr);
+  padding: 0.35rem 0.65rem;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: none;
+}
+
+.board-shell.is-fullscreen .board-spotlight strong {
+  font-size: 0.82rem;
+  line-height: 1.15;
+}
+
+.board-shell.is-fullscreen .board-spotlight p {
+  font-size: 0.72rem;
+  line-height: 1.2;
 }
 
 .board-shell.is-fullscreen .board-fs-btn {
@@ -485,21 +510,29 @@
   position: absolute;
   top: 56px;
   bottom: 0;
+  z-index: 3;
   background: repeating-linear-gradient(-55deg, var(--red-08) 0 8px, transparent 8px 16px);
   border-left: 1px dashed var(--red-16);
   border-right: 1px dashed var(--red-16);
   display: flex;
   justify-content: center;
-  padding-top: var(--space-3);
+  padding-top: 10px;
   pointer-events: none;
 }
 
 .band-label {
+  position: relative;
+  z-index: 4;
   writing-mode: vertical-rl;
   color: var(--red);
-  opacity: 0.75;
+  opacity: 0.95;
   font-size: 0.62rem;
   white-space: nowrap;
+  max-height: min(220px, calc(100% - 20px));
+  padding: 5px 2px;
+  border-radius: 999px;
+  background: rgba(252, 242, 242, 0.82);
+  box-shadow: 0 0 0 1px rgba(204, 32, 39, 0.1);
 }
 
 .board-band.is-live {
