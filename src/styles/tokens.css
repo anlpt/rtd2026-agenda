@@ -22,7 +22,7 @@
   --text-sm: 0.85rem;
   --text-base: clamp(0.95rem, 0.9rem + 0.25vw, 1.05rem);
   --text-lg: clamp(1.15rem, 1rem + 0.6vw, 1.5rem);
-  --text-display: clamp(2.2rem, 1rem + 5vw, 5.5rem);
+  --text-display: clamp(2.2rem, 1rem + 5vw, 7rem);
   --text-hero: clamp(3.4rem, 1.2rem + 11vw, 12rem);
 
   /* Rhythm */
@@ -33,6 +33,7 @@
   --space-5: 3rem;
   --space-section: clamp(4rem, 3rem + 5vw, 8rem);
   --rail: clamp(1rem, 4vw, 4rem);
+  --page-max: min(2200px, calc(100vw - 2rem));
 
   /* Motion */
   --duration-fast: 160ms;

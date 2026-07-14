@@ -6,7 +6,7 @@ import './board.css';
 const LABEL_W = 132;
 const SNAP_MIN = 5;
 const MIN_PPM = 2.3; // readability floor — below this, blocks get too narrow
-const MAX_PPM = 4.2;
+const MAX_PPM = 5.2;
 const HALF_HOUR = 30;
 
 const ROOM_TBA = 'Room TBA';
