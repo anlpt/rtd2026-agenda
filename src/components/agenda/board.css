@@ -317,13 +317,23 @@
 }
 
 /* cozy mode: medium rows — one-line titles so nothing half-clips */
+.board-cozy .block {
+  padding: 3px 7px;
+  gap: 1px;
+}
+
 .board-cozy .block-title {
   -webkit-line-clamp: 1;
+  font-size: 0.66rem;
+  line-height: 1.1;
 }
 
 .board-cozy .block-detail {
-  font-size: 0.56rem;
-  -webkit-line-clamp: 1;
+  display: none;
+}
+
+.board-cozy .block-time {
+  display: none;
 }
 
 /* compact mode: rows squeezed to fit every room on screen —
@@ -398,6 +408,10 @@
   display: -webkit-box;
   font-size: 0.64rem;
   -webkit-line-clamp: 2;
+}
+
+.board-shell.is-fullscreen .block-time {
+  display: block;
 }
 
 .board-shell.is-fullscreen .board-compact .block-detail {
