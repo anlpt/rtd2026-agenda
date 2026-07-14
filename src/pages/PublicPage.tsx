@@ -23,9 +23,13 @@ export function PublicPage() {
     document.querySelector('#venue')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const exploreAgenda = () => {
+    document.querySelector('#agenda')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <>
-      <Hero tagline={settings.hero_tagline ?? ''} now={now} />
+      <Hero tagline={settings.hero_tagline ?? ''} now={now} onExploreAgenda={exploreAgenda} />
       {settings.announcement && (
         <div className="announcement" role="status">
           <span className="mono">Notice</span>

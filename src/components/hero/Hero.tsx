@@ -37,7 +37,7 @@ function Countdown({ now }: { now: Date }) {
   );
 }
 
-export function Hero({ tagline, now }: { tagline: string; now: Date }) {
+export function Hero({ tagline, now, onExploreAgenda }: { tagline: string; now: Date; onExploreAgenda: () => void }) {
   const [offset, setOffset] = useState(0);
 
   useEffect(() => {
@@ -79,9 +79,9 @@ export function Hero({ tagline, now }: { tagline: string; now: Date }) {
 
       <div className="hero-top mono">
         <span>UEH University · College of Technology and Design</span>
-        <a href="#agenda" className="hero-top-link">
+        <button type="button" className="hero-top-link" onClick={onExploreAgenda}>
           Agenda ↓
-        </a>
+        </button>
       </div>
 
       <div className="hero-content">
@@ -104,10 +104,10 @@ export function Hero({ tagline, now }: { tagline: string; now: Date }) {
         </div>
       </div>
 
-      <a href="#agenda" className="scroll-cue mono" aria-label="Scroll to agenda">
+      <button type="button" className="scroll-cue mono" aria-label="Scroll to agenda" onClick={onExploreAgenda}>
         <span className="scroll-cue-beam" aria-hidden="true" />
         explore the agenda
-      </a>
+      </button>
     </header>
   );
 }

@@ -5,7 +5,6 @@
   flex-direction: column;
   justify-content: space-between;
   overflow: hidden;
-  pointer-events: none;
   color: var(--white);
   background:
     radial-gradient(140% 90% at 50% 112%, var(--red-glow) 0%, transparent 42%),
@@ -94,6 +93,8 @@
 
 .hero-top-link {
   pointer-events: auto;
+  background: none;
+  border: 0;
   color: var(--white);
   text-decoration: none;
   border-bottom: 1px solid var(--white-70);
@@ -185,6 +186,8 @@
   pointer-events: auto;
   position: relative;
   z-index: 2;
+  background: none;
+  border: 0;
   justify-self: center;
   align-self: center;
   display: grid;

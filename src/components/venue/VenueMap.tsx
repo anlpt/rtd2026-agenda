@@ -73,7 +73,7 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
         const e = (t - start) / 1000;
         const dragging = spin.current.drag !== null;
         if (!dragging && !spin.current.hovered) {
-          spin.current.base += dt * 1.6;
+          spin.current.base += dt * 2.8;
         }
         const sway = dragging || spin.current.hovered ? 0 : Math.cos(e * 0.2) * 0.35;
         const tilt = dragging ? 0 : Math.sin(e * 0.28) * 0.9;
