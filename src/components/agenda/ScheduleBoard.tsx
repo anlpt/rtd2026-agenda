@@ -28,6 +28,14 @@ export function boardRange(sessions: Session[]): { start: number; end: number } 
 
 const fmt = (min: number) => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
 
+const blockDetail = (s: Session): string | null => {
+  if (s.speaker) return s.speaker;
+  if (s.chair) return `Chair: ${s.chair}`;
+  if (s.description) return s.description;
+  if (s.paper_count) return `${s.paper_count} presentations`;
+  return null;
+};
+
 interface Props {
   day: Day;
   sessions: Session[]; // all sessions of the day, time-sorted
@@ -162,7 +170,7 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
       </button>
       <div
         className={`board${scrubMin !== null ? ' is-scrubbing' : ''}${
-          rowH < 62 ? ' board-compact' : rowH < 86 ? ' board-cozy' : ''
+          rowH < 50 ? ' board-compact' : rowH < 74 ? ' board-cozy' : ''
         }`}
         ref={scrollRef}
         onPointerMove={scrubFromPointer}
@@ -220,6 +228,7 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
                       const w = minToX(toMinutes(s.end_time)) - x;
                       const liveNow = live.liveIds.has(s.id);
                       const next = live.nextIds.has(s.id);
+                      const detail = blockDetail(s);
                       const classes = [
                         'block',
                         `block-${s.type}`,
@@ -249,6 +258,7 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
                             {!liveNow && next && <span className="mono block-next">NEXT</span>}
                           </span>
                           <span className="block-title">{s.title}</span>
+                          {detail && <span className="block-detail">{detail}</span>}
                           <span className="mono block-time">
                             {s.start_time}–{s.end_time}
                           </span>

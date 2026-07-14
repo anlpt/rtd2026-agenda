@@ -257,6 +257,16 @@
   overflow: hidden;
 }
 
+.block-detail {
+  color: var(--ink-60);
+  font-size: 0.64rem;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .block-time {
   color: var(--ink-60);
   font-size: 0.58rem;
@@ -275,6 +285,11 @@
 }
 
 .block-keynote .block-time {
+  color: var(--white-70);
+}
+
+.block-keynote .block-detail,
+.block-ceremony .block-detail {
   color: var(--white-70);
 }
 
@@ -306,6 +321,11 @@
   -webkit-line-clamp: 1;
 }
 
+.board-cozy .block-detail {
+  font-size: 0.56rem;
+  -webkit-line-clamp: 1;
+}
+
 /* compact mode: rows squeezed to fit every room on screen —
    single-line layout so nothing can clip vertically */
 .board-compact .block {
@@ -316,6 +336,10 @@
 }
 
 .board-compact .block-time {
+  display: none;
+}
+
+.board-compact .block-detail {
   display: none;
 }
 
@@ -364,6 +388,20 @@
 .board-shell.is-fullscreen .board-fs-btn {
   top: 8px;
   right: 12px;
+}
+
+.board-shell.is-fullscreen .block-title {
+  -webkit-line-clamp: 2;
+}
+
+.board-shell.is-fullscreen .block-detail {
+  display: -webkit-box;
+  font-size: 0.64rem;
+  -webkit-line-clamp: 2;
+}
+
+.board-shell.is-fullscreen .board-compact .block-detail {
+  display: none;
 }
 
 .block-live,
