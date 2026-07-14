@@ -341,7 +341,7 @@
 }
 
 .block-showcase {
-  background: var(--blush);
+  background: rgba(252, 242, 242, 0.72);
   border: 1px dashed var(--red);
 }
 
@@ -349,16 +349,43 @@
   color: var(--red-deep);
 }
 
+.block-showcase.is-wide {
+  top: 6px;
+  bottom: 6px;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.45rem;
+  padding-left: 3.1rem;
+  background: rgba(252, 242, 242, 0.42);
+  border-style: dashed;
+  box-shadow: none;
+}
+
+.block-showcase.is-wide .block-head {
+  flex-shrink: 0;
+}
+
+.block-showcase.is-wide .block-title {
+  -webkit-line-clamp: 1;
+  min-width: 0;
+}
+
+.block-showcase.is-wide .block-time {
+  display: none;
+}
+
 /* cozy mode: medium rows — one-line titles so nothing half-clips */
 .board-cozy .block {
-  padding: 3px 7px;
+  top: 5px;
+  bottom: 5px;
+  padding: 4px 7px;
   gap: 1px;
 }
 
 .board-cozy .block-title {
   -webkit-line-clamp: 1;
-  font-size: 0.66rem;
-  line-height: 1.1;
+  font-size: 0.68rem;
+  line-height: 1.16;
 }
 
 .board-cozy .block-time {
@@ -368,9 +395,11 @@
 /* compact mode: rows squeezed to fit every room on screen —
    single-line layout so nothing can clip vertically */
 .board-compact .block {
+  top: 5px;
+  bottom: 5px;
   flex-direction: row;
   align-items: center;
-  padding: 2px 7px;
+  padding: 3px 7px;
   gap: 6px;
 }
 
@@ -489,6 +518,11 @@
   animation: block-glow 2.4s ease-in-out infinite;
 }
 
+.block-showcase.is-live {
+  box-shadow: 0 0 0 1px rgba(204, 32, 39, 0.36);
+  animation: none;
+}
+
 @keyframes block-glow {
   0%,
   100% {
@@ -529,7 +563,7 @@
   border-right: 1px dashed var(--red-16);
   display: flex;
   justify-content: center;
-  padding-top: clamp(74px, 8vh, 116px);
+  padding-top: clamp(126px, 12vh, 154px);
   pointer-events: none;
 }
 

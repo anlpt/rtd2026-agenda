@@ -109,7 +109,8 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
       setIsFullscreen(fs);
       const chrome = fs ? 260 : 430; // ruler + surrounding UI + event detail strip
       const available = window.innerHeight - chrome;
-      setRowH(Math.max(34, Math.min(104, Math.floor(available / Math.max(rooms.length, 1)))));
+      const minRow = fs ? 54 : 58;
+      setRowH(Math.max(minRow, Math.min(104, Math.floor(available / Math.max(rooms.length, 1)))));
     };
     compute();
     window.addEventListener('resize', compute);
@@ -245,11 +246,13 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
                     .map((s) => {
                       const x = minToX(toMinutes(s.start_time));
                       const w = minToX(toMinutes(s.end_time)) - x;
+                      const isWide = w > 420;
                       const liveNow = live.liveIds.has(s.id);
                       const next = live.nextIds.has(s.id);
                       const classes = [
                         'block',
                         `block-${s.type}`,
+                        isWide ? 'is-wide' : '',
                         liveNow ? 'is-live' : '',
                         next ? 'is-next' : '',
                         isHot(s) ? 'is-hot' : '',
