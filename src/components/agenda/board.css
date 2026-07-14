@@ -9,25 +9,27 @@
 }
 
 .board-spotlight {
-  min-height: 58px;
+  min-height: 74px;
   margin-bottom: var(--space-2);
   display: grid;
-  grid-template-columns: minmax(260px, 0.82fr) minmax(320px, 1.18fr);
-  gap: 0.32rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.28rem;
   align-items: center;
-  padding: 0.58rem 0.75rem;
-  background: rgba(255, 255, 255, 0.68);
+  padding: 0.78rem 10.5rem 0.86rem 0.9rem;
+  background: rgba(255, 255, 255, 0.78);
   border: 1px solid var(--ink-12);
   border-left: 3px solid var(--red);
-  box-shadow: 0 8px 24px rgba(204, 32, 39, 0.07);
+  box-shadow: 0 10px 22px rgba(204, 32, 39, 0.045);
+  overflow: visible;
 }
 
 .board-spotlight strong {
   display: block;
-  margin-top: 2px;
+  margin-top: 0.18rem;
   font-size: clamp(0.86rem, 0.78rem + 0.25vw, 1.05rem);
-  line-height: 1.2;
+  line-height: 1.28;
   color: var(--ink);
+  padding-bottom: 0.05rem;
 }
 
 .spotlight-kicker {
@@ -36,10 +38,17 @@
 }
 
 .board-spotlight p {
+  justify-self: start;
+  max-width: min(940px, 100%);
   margin: 0;
+  padding: 0;
   color: var(--ink-60);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
   font-size: clamp(0.74rem, 0.69rem + 0.18vw, 0.9rem);
-  line-height: 1.35;
+  line-height: 1.25;
+  text-align: left;
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
@@ -207,6 +216,7 @@
 
 .board-rows {
   position: relative;
+  z-index: 2;
 }
 
 .board-row {
@@ -404,7 +414,7 @@
 
 .board-shell.is-fullscreen {
   background: var(--blush);
-  padding: 3.25rem 1.5rem 1rem;
+  padding: 3.8rem 1.5rem 1rem;
   width: 100%;
   margin: 0;
   overflow: auto;
@@ -416,9 +426,10 @@
   left: 1.5rem;
   right: 13.5rem;
   z-index: 10;
-  min-height: 32px;
-  grid-template-columns: minmax(220px, 0.85fr) minmax(240px, 1.15fr);
-  padding: 0.35rem 0.65rem;
+  min-height: 44px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.2rem;
+  padding: 0.45rem 0.75rem 0.52rem;
   margin: 0;
   background: rgba(255, 255, 255, 0.82);
   box-shadow: none;
@@ -426,12 +437,14 @@
 
 .board-shell.is-fullscreen .board-spotlight strong {
   font-size: 0.82rem;
-  line-height: 1.15;
+  line-height: 1.24;
 }
 
 .board-shell.is-fullscreen .board-spotlight p {
   font-size: 0.72rem;
   line-height: 1.2;
+  max-width: min(780px, 100%);
+  padding: 0;
 }
 
 .board-shell.is-fullscreen .board-fs-btn {
@@ -510,29 +523,25 @@
   position: absolute;
   top: 56px;
   bottom: 0;
-  z-index: 3;
+  z-index: 1;
   background: repeating-linear-gradient(-55deg, var(--red-08) 0 8px, transparent 8px 16px);
   border-left: 1px dashed var(--red-16);
   border-right: 1px dashed var(--red-16);
   display: flex;
   justify-content: center;
-  padding-top: 10px;
+  padding-top: clamp(74px, 8vh, 116px);
   pointer-events: none;
 }
 
 .band-label {
   position: relative;
-  z-index: 4;
   writing-mode: vertical-rl;
   color: var(--red);
-  opacity: 0.95;
+  opacity: 0.9;
   font-size: 0.62rem;
   white-space: nowrap;
   max-height: min(220px, calc(100% - 20px));
-  padding: 5px 2px;
-  border-radius: 999px;
-  background: rgba(252, 242, 242, 0.82);
-  box-shadow: 0 0 0 1px rgba(204, 32, 39, 0.1);
+  padding: 0 2px;
 }
 
 .board-band.is-live {
@@ -598,8 +607,12 @@
     grid-template-columns: 1fr;
     min-height: 0;
     gap: 0.35rem;
+    padding: 0.72rem 0.8rem 0.78rem;
   }
   .board-spotlight p {
+    justify-self: start;
+    max-width: 100%;
+    text-align: left;
     -webkit-line-clamp: 1;
   }
   .board {
