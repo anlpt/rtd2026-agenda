@@ -16,7 +16,7 @@
   gap: var(--space-2);
   margin-bottom: var(--space-4);
   width: 100%;
-  max-width: var(--page-max);
+  max-width: 1240px;
   margin-inline: auto;
 }
 
@@ -152,7 +152,7 @@
   gap: var(--space-4);
   align-items: start;
   width: 100%;
-  max-width: var(--page-max);
+  max-width: 1400px;
   margin-inline: auto;
 }
 
@@ -215,7 +215,7 @@
   width: 340px;
   height: 300px;
   /* headroom for the exploded upper floors + offset for the rotated bbox */
-  margin: 168px 0 28px 90px;
+  margin: 82px 0 108px 90px;
   transform-style: preserve-3d;
   /* --tilt / --spin driven by JS for idle drift + drag-orbit */
   transform: rotateX(calc(55deg + var(--tilt, 0deg))) rotateZ(calc(-38deg + var(--spin, 0deg)));
@@ -761,6 +761,16 @@
   stroke-width: 0.8;
 }
 
+.venue-hologram .venue-stack.is-focused .venue-floor.is-front .floor-slab {
+  fill: rgba(255, 255, 255, 0.025);
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 0.5;
+}
+
+.venue-hologram .venue-stack.is-focused .venue-floor.is-front .floor-core {
+  opacity: 0.36;
+}
+
 .venue-hologram .floor-core {
   fill: rgba(255, 74, 82, 0.14);
   stroke: rgba(255, 74, 82, 0.5);
@@ -989,7 +999,7 @@
   }
   .venue-stack {
     justify-self: center;
-    margin: 148px auto 24px;
+    margin: 58px auto 82px;
     transform: rotateX(calc(57deg + var(--tilt, 0deg))) rotateZ(calc(-38deg + var(--spin, 0deg))) scale(0.72);
   }
 }
@@ -1001,7 +1011,7 @@
   .venue-stack {
     width: 300px;
     height: 260px;
-    margin-top: 178px;
+    margin-top: 52px;
     transform: rotateX(calc(57deg + var(--tilt, 0deg))) rotateZ(calc(-38deg + var(--spin, 0deg))) scale(0.64);
   }
   .venue-legend {

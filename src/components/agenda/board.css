@@ -9,13 +9,12 @@
 }
 
 .board-spotlight {
-  min-height: 62px;
+  min-height: 74px;
   margin-bottom: var(--space-2);
   display: grid;
-  grid-template-columns: minmax(220px, 0.85fr) minmax(280px, 1.15fr);
-  gap: var(--space-3);
-  align-items: center;
-  padding: 0.65rem 0.85rem;
+  gap: 0.32rem;
+  align-items: start;
+  padding: 0.72rem 0.9rem;
   background: rgba(255, 255, 255, 0.68);
   border: 1px solid var(--ink-12);
   border-left: 3px solid var(--red);
@@ -416,11 +415,7 @@
 }
 
 .board-shell.is-fullscreen .block-title {
-  -webkit-line-clamp: 2;
-}
-
-.board-shell.is-fullscreen .block-time {
-  display: block;
+  -webkit-line-clamp: 1;
 }
 
 .block-live,

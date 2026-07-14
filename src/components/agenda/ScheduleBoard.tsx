@@ -107,7 +107,7 @@ export function ScheduleBoard({ day, sessions, dimmedIds, live, clock, scrubMin,
     const compute = () => {
       const fs = document.fullscreenElement === shellRef.current;
       setIsFullscreen(fs);
-      const chrome = fs ? 230 : 400; // ruler + surrounding UI + event detail strip
+      const chrome = fs ? 250 : 420; // ruler + surrounding UI + event detail strip
       const available = window.innerHeight - chrome;
       setRowH(Math.max(34, Math.min(104, Math.floor(available / Math.max(rooms.length, 1)))));
     };
