@@ -181,6 +181,7 @@
 
 .day-content {
   position: relative;
+  overflow: hidden;
 }
 
 .day-wipe {

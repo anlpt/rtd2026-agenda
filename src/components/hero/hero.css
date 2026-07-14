@@ -5,6 +5,7 @@
   flex-direction: column;
   justify-content: space-between;
   overflow: hidden;
+  pointer-events: none;
   color: var(--white);
   background:
     radial-gradient(140% 90% at 50% 112%, var(--red-glow) 0%, transparent 42%),
@@ -16,6 +17,7 @@
 .hero-sky {
   position: absolute;
   inset: 0;
+  pointer-events: none;
   will-change: transform;
 }
 
@@ -60,6 +62,7 @@
   bottom: -46vw;
   width: 160vw;
   height: 60vw;
+  pointer-events: none;
   transform: translateX(-50%);
   border-radius: 50% 50% 0 0 / 100% 100% 0 0;
   background: radial-gradient(120% 100% at 50% 100%, var(--red-deep) 30%, var(--red) 75%);
@@ -90,6 +93,7 @@
 }
 
 .hero-top-link {
+  pointer-events: auto;
   color: var(--white);
   text-decoration: none;
   border-bottom: 1px solid var(--white-70);
@@ -178,6 +182,7 @@
 /* ---- scroll cue ---- */
 
 .scroll-cue {
+  pointer-events: auto;
   position: relative;
   z-index: 2;
   justify-self: center;

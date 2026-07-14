@@ -57,7 +57,7 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (transitionTimer.current) window.clearTimeout(transitionTimer.current);
     setMapTransitioning(true);
-    transitionTimer.current = window.setTimeout(() => setMapTransitioning(false), 1350);
+    transitionTimer.current = window.setTimeout(() => setMapTransitioning(false), 2050);
   };
 
   // Living hologram: auto-orbit the overview, pausing on hover or drag.
@@ -73,10 +73,10 @@ export function VenueMap({ sessions, onShowOnSchedule, variant = 'hologram', foc
         const e = (t - start) / 1000;
         const dragging = spin.current.drag !== null;
         if (!dragging && !spin.current.hovered) {
-          spin.current.base += dt * 18;
+          spin.current.base += dt * 1.6;
         }
-        const sway = dragging || spin.current.hovered ? 0 : Math.cos(e * 0.32) * 0.8;
-        const tilt = dragging ? 0 : Math.sin(e * 0.45) * 1.8;
+        const sway = dragging || spin.current.hovered ? 0 : Math.cos(e * 0.2) * 0.35;
+        const tilt = dragging ? 0 : Math.sin(e * 0.28) * 0.9;
         el.style.setProperty('--spin', `${(spin.current.base + sway).toFixed(2)}deg`);
         el.style.setProperty('--tilt', `${tilt.toFixed(2)}deg`);
       }
