@@ -25,7 +25,7 @@ export const day5Sessions: Session[] = [
   s({ day_id: DAY5, type: 'special', code: null, title: 'Blue FutureScape: Oceanovation for Sustainable Blue Growth', speaker: null, chair: 'Dr. Tri Dung Dang — Institute of Intelligent and Interactive Technologies, CTD-UEH', panelists: 'Dr. Vu Lan Nguyen; Dr. Nhat Luong Nhieu; Prof. Thanh Danh Le; Prof. Kim Yong-Guk', room: 'Room 1', start_time: '10:40', end_time: '12:10', description: null, papers: null }),
   s({ day_id: DAY5, type: 'break', code: null, title: 'Lunch', speaker: null, chair: null, panelists: null, room: null, start_time: '12:10', end_time: '13:10', description: 'For invited guests and paid registered participants only.', papers: null }),
 
-  s({ day_id: DAY5, type: 'parallel', code: 'NX1', title: 'Innovation, Growth, and Sustainability', speaker: null, chair: 'Mr. Cho Kwanphil', panelists: null, room: 'Room 1', start_time: '13:30', end_time: '15:15', description: null, papers: [
+  s({ day_id: DAY5, type: 'parallel', code: 'NX1', title: 'Innovation, Growth, and Sustainability', speaker: null, chair: 'Dr. Long Phi Hoang', panelists: null, room: 'Room 1', start_time: '13:30', end_time: '15:15', description: null, papers: [
     p('ID 211', '13:30–13:45', 'Community-Based Tourism Development Linked with Marine Ecosystem Conservation on Bich Dam Island, Nha Trang City', 'Van Du Nguyen'),
     p('ID 161', '13:45–14:00', 'Marine Environmental Protection as Police Powers Under International Investment Law: The Case of Vietnam’s Coastal Tourism Regulation', 'Le Thi Thanh Thanh, Ho Anh Thu'),
     p('ID 121', '14:00–14:15', 'How Green Human Resource Management Drives Employees’ Green Behavior: Evidence from Vietnam’s Coastal Tourism Industry', 'Nguyen Quynh Nhi, Trinh Le Duy'),
@@ -34,7 +34,7 @@ export const day5Sessions: Session[] = [
     p('ID 91', '14:45–15:00', 'Evaluating the Bioeconomy Nexus: Techno-Economic Optimization, Carbon Credit Potential, and Social Multiplier Effects in Anaerobic Digestion Systems', 'Tan Trung Nguyen'),
     p('ID 174', '15:00–15:15', 'ESG Awareness and Retail Investment Decisions: The Moderating Role of Investment Horizon in the Vietnamese Stock Market', 'Ngoc To Uyen Le, Thuy Ngoc Vuong, Yen Hai Hoang'),
   ] }),
-  s({ day_id: DAY5, type: 'parallel', code: 'NX2', title: 'Environmental, Economic and Technological Transitions', speaker: null, chair: 'Mr. Donghwan Moon', panelists: null, room: 'Main Hall', start_time: '13:30', end_time: '15:15', description: null, papers: [
+  s({ day_id: DAY5, type: 'parallel', code: 'NX2', title: 'Environmental, Economic and Technological Transitions', speaker: null, chair: 'Dr. Vu Lan Nguyen', panelists: null, room: 'Main Hall', start_time: '13:30', end_time: '15:15', description: null, papers: [
     p('ID 180', '13:30–13:45', 'Life-Cycle Greenhouse Gas Emissions and Combustion Performance of Palm Biodiesel Under Different Land-Use Scenarios', 'Thanh Phuong Ton Nu'),
     p('ID 235', '13:45–14:00', 'Ecological Transition from Ocean to City: Spatial Equity and the Accessibility of Public Open Spaces', 'Nhu Nguyen Tran Linh, Ngoc Le Pham Khanh, Ngoc Le Hoang Kim, Anh Vo Ngoc Quynh, Tuan Le Nguyen Duc, Nam-Hai Hoang Le'),
     p('ID 88', '14:00–14:15', 'Total Factor Productivity and the Growth Pattern of Marine Fisheries in Vietnam’s 28 Coastal Provinces', 'Thuy Trang Vo, Trong Bao Nguyen'),
